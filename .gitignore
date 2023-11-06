@@ -33,3 +33,9 @@
 
 # Data
 data/
+
+# Compiled
+out/
+
+# Visual studio
+.vs/
