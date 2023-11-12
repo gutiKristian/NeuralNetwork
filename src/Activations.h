@@ -5,25 +5,12 @@
 
 using ActivationFunction = double (*)(double);
 
-double UnitStepFunction(double potential)
-{
-	return potential >= 0.0 ? 1.0 : 0.0;
-}
+double UnitStepFunction(double potential);
 
 // output layer
-double LogisticSigmoid(double potential)
-{
-	double steepness = 1.0;
-	return 1 / (1 + std::exp(potential * steepness));
-}
+double LogisticSigmoid(double potential);
 
 // hidden layer
-double ReLu(double potential)
-{
-	return std::max(potential, 0.0);
-}
+double ReLu(double potential);
 
-double Identity(double potential)
-{
-	return potential;
-}
+double Identity(double potential);
