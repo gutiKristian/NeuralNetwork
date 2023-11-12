@@ -8,7 +8,7 @@
 class Layer
 {
 public:
-	Layer(size_t In, size_t Size, ActivationFunction activationFunction, std::string name = "Layer") : m_In(In), m_Size(Size), m_ActivationFunction(activationFunction), m_Name(std::move(name))
+	Layer(size_t In, size_t Size, ActivationFunction activationFunction) : m_In(In), m_Size(Size), m_ActivationFunction(activationFunction)
 	{
 		m_Outputs.reserve(m_Size);
 		m_Potentials.reserve(m_Size);
@@ -66,7 +66,6 @@ private:
 	size_t m_In = 0;
 	size_t m_Size = 0;
 	ActivationFunction m_ActivationFunction;
-	std::string m_Name;
 
 	// Weights between this layer and layer below
 	std::vector<std::vector<double>> m_Weights{};
