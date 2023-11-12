@@ -10,7 +10,7 @@ NeuralNet::NeuralNet(std::initializer_list<Layer> layers) : m_Layers(layers)
 	}
 }
 
-void NeuralNet::ComputeForward(const std::vector<std::vector<double>>& batch)
+void NeuralNet::Train(const std::vector<std::vector<double>>& batch)
 {
 	assert(m_Layers.size() > 0 && "No layers present!");
 
@@ -24,7 +24,6 @@ void NeuralNet::ComputeForward(const std::vector<std::vector<double>>& batch)
 	{
 		auto& input = batch[i];
 		startLayer.FeedForward(input);
-		// outputLayer do something ?
 	}
 
 }

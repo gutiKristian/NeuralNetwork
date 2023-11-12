@@ -54,6 +54,8 @@ public:
 		p_NextLayer = nextLayer;
 	}
 
+	inline const std::vector<double>& GetOutputs() { return m_Outputs; }
+
 private:
 	void Log()
 	{
