@@ -56,6 +56,8 @@ public:
 
 	inline const std::vector<double>& GetOutputs() { return m_Outputs; }
 
+	inline size_t GetLayerSize() { return m_Size; }
+
 private:
 	void Log()
 	{
