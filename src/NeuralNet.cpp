@@ -50,7 +50,7 @@ void NeuralNet::Train(const std::vector<std::vector<double>>& batchInputs, const
 		
 		auto& outputs = outputLayer.GetOutputs();
 
-		ComputeErrorGrad(outputs, batchOutputs[i], batchInputs[i]);		
+		ComputeErrorGrad(outputs, batchOutputs[i], batchInputs[i]);
 		
 		error += ComputeError(outputs, batchOutputs[i]);
 
@@ -65,7 +65,8 @@ void NeuralNet::ComputeErrorGrad(const std::vector<double>& netOutputs, const st
 	size_t size = netOutputs.size();
 	for (int i = 0; i < size; ++i)
 	{
-		m_Gradient[i] = m_Gradient[i] + (netOutputs[i] - expctedOutputs[i]) * inputs[i];
+		// MSE
+		m_Gradient[i] += (netOutputs[i] - expctedOutputs[i]);
 	}
 }
 
