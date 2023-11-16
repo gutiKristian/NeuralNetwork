@@ -41,7 +41,6 @@ public:
 				m_Potentials[k][i] = current; // Keep potentials for back propagation
 				m_Outputs[k][i] = m_ActivationFunction(current);
 			}
-
 		}
 
 		if (!p_NextLayer)
@@ -57,10 +56,24 @@ public:
 	*/
 	void BackwardPass(const Matrix& batchPredResult, const Matrix& batchOutputs)
 	{
+		assert(batchOutputs.size() == batchPredResult.size() && batchPredResult.size() > 0 && "Size mismatch!");
+		assert(batchOutputs[0].size() == batchPredResult[0].size() && batchPredResult[0].size() > 0 && "Size mismatch!");
+
+		std::vector<double> gradients(batchOutputs[0].size(), 0); // can be preallocated
+
+		// For MSE -> E = sum(y_i - d_ki)
+		for (int i = 0; i < batchPredResult.size(); ++i)
+		{
+			for (int j = 0; j < batchPredResult[0].size(); ++j)
+			{
+				gradients[i] += (batchPredResult[i][j] - batchOutputs[i][j]);
+			}
+		}
+
 		if (!p_PrevLayer)
 		{
 			// Call another layer, this is going to be hidden
-			//p_PrevLayer->BackwardPass(derivedValues);
+			p_PrevLayer->BackwardPass(gradients);
 		}
 	}
 
