@@ -50,7 +50,23 @@ public:
 		}
 	}
 
-	// Pass already derived values
+	/*
+	* Top layer loss computation.
+	* @batchPredResult: prediction made by network
+	* @batchOutputs: true values
+	*/
+	void BackwardPass(const Matrix& batchPredResult, const Matrix& batchOutputs)
+	{
+		if (!p_PrevLayer)
+		{
+			// Call another layer, this is going to be hidden
+			//p_PrevLayer->BackwardPass(derivedValues);
+		}
+	}
+
+	/*
+	* @derivedValues: derivation computed in the layer above
+	*/
 	void BackwardPass(const std::vector<double>& derivedValues)
 	{
 		if (!p_PrevLayer)
