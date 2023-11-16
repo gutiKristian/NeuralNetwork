@@ -5,7 +5,7 @@
 class NeuralNet
 {
 public:
-	NeuralNet(std::initializer_list<Layer> layers);
+	NeuralNet(std::initializer_list<Layer> layers, int batchSize = 1);
 public:
 	void Train(const std::vector<std::vector<double>>& batchInputs, const std::vector<std::vector<double>>& batchOutputs);
 
@@ -20,4 +20,5 @@ public:
 private:
 	std::vector<double> m_Gradient;
 	std::vector<Layer> m_Layers;
+	int m_BatchSize;
 };

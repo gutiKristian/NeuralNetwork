@@ -7,40 +7,41 @@
 
 class Layer
 {
+	using Matrix = std::vector<std::vector<double>>;
 public:
 	Layer(size_t In, size_t Size, ActivationFunction activationFunction) : m_In(In), m_Size(Size), m_ActivationFunction(activationFunction)
 	{
-		m_Outputs.reserve(m_Size);
-		m_Potentials.reserve(m_Size);
-		m_Weights.reserve(m_Size * m_In);
+		m_Weights.resize(m_In, std::vector<double>(m_Size));
 		Log();
 	};
 
 public:
 
-	void FeedForward(const std::vector<double>& input)
+	/*
+	* Input is 2D array of inputs -- batch
+	*/
+	void FeedForward(const Matrix& batches)
 	{
+		assert(batches.size() > 0 && "Batch size must be > 0");
+		assert(m_In == batches[0].size());
 
-		assert(m_In == input.size());
-
-		/*
-		* Compute inner potential
-		* Traverse neuron by neuron
-		*/
-		for (int i = 0; i < m_Size; ++i)
+		auto batchesSize = batches.size();
+		
+		// Compute for every input in the batch
+		for (int k = 0; k < batchesSize; ++k)
 		{
-			double current = 0.0;
-			for (int j = 0; j < m_In; ++j)
+			// Compute inner potential, traverse neuron by neuron
+			for (int i = 0; i < m_Size; ++i)
 			{
-				current += input[j] * m_Weights[i][j];
+				double current = 0.0;
+				for (int j = 0; j < m_In; ++j)
+				{
+					current += batches[k][j] * m_Weights[i][j];
+				}
+				m_Potentials[k][i] = current; // Keep potentials for back propagation
+				m_Outputs[k][i] = m_ActivationFunction(current);
 			}
-			m_Potentials[i] = current;
-		}
 
-		// Compute outputs, that are forwarded as inputs to the other layer
-		for (int i = 0; i < m_Size; ++i)
-		{
-			m_Outputs[i] = m_ActivationFunction(m_Potentials[i]);
 		}
 
 		if (!p_NextLayer)
@@ -49,12 +50,33 @@ public:
 		}
 	}
 
-	void SetConnection(Layer* nextLayer)
+	// Pass already derived values
+	void BackwardPass(const std::vector<double>& derivedValues)
+	{
+		if (!p_PrevLayer)
+		{
+			p_PrevLayer->BackwardPass(derivedValues);
+		}
+	}
+
+	void SetForwardConnection(Layer* nextLayer)
 	{
 		p_NextLayer = nextLayer;
 	}
 
-	inline const std::vector<double>& GetOutputs() { return m_Outputs; }
+	void SetBackwardConnection(Layer* previousLayer)
+	{
+		p_PrevLayer = previousLayer;
+	}
+
+	void PreAllocateMem(int batchSize)
+	{
+		// Using resize on purpose so we can already access with []
+		m_Outputs.resize(batchSize, std::vector<double>(m_Size));
+		m_Potentials.resize(batchSize, std::vector<double>(m_Size));
+	}
+
+	inline const Matrix& GetOutputs() { return m_Outputs; }
 
 	inline size_t GetLayerSize() { return m_Size; }
 
@@ -67,15 +89,16 @@ private:
 	}
 
 private:
+	// Incoming inputs
 	size_t m_In = 0;
 	size_t m_Size = 0;
 	ActivationFunction m_ActivationFunction;
-
 	// Weights between this layer and layer below
-	std::vector<std::vector<double>> m_Weights{};
+	Matrix m_Weights{};
 	// Potential and Outputs of current Layer
-	std::vector<double> m_Potentials{};
-	std::vector<double> m_Outputs{};
+	Matrix m_Potentials{};
+	Matrix m_Outputs{};
 	//
 	Layer* p_NextLayer = nullptr;
+	Layer* p_PrevLayer = nullptr;
 };
