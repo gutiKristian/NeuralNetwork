@@ -62,13 +62,21 @@ public:
 		//! BACKWARD PASS FOR OUTPUT LAYER. ITS SORT OF PREPARING INPUT FOR THE BACKWARD PASS
 		std::vector<double> gradients(batchOutputs[0].size(), 0); // can be preallocated
 
+		auto batchSize = batchPredResult.size();
+		auto batchOutputSize = batchPredResult[0].size();
+
 		// For MSE -> E = sum(y_i - d_ki)
-		for (int i = 0; i < batchPredResult.size(); ++i)
+		for (int i = 0; i < batchSize; ++i)
 		{
-			for (int j = 0; j < batchPredResult[0].size(); ++j)
+			for (int j = 0; j < batchOutputSize; ++j)
 			{
-				gradients[i] += (batchPredResult[i][j] - batchOutputs[i][j]);
+				gradients[j] += (batchPredResult[i][j] - batchOutputs[i][j]);
 			}
+		}
+
+		for (int i = 0; i < batchOutputSize; ++i)
+		{
+			gradients[i] /= batchSize;
 		}
 
 		//! BACKWARD PASS FOR HIDDEN LAYER, IT USES THE REC. FORMULA, ALSO TO UPDATE WEIGHTS BETWEEN OUTPUT AND LAST HIDDEN
