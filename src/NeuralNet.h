@@ -20,5 +20,6 @@ public:
 private:
 	std::vector<double> m_Gradient;
 	std::vector<Layer> m_Layers;
+	Layer m_InputLayer; // Dummy input layer for backprop
 	int m_BatchSize;
 };

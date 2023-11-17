@@ -2,7 +2,8 @@
 #include <iostream>
 #include <cmath>
 
-NeuralNet::NeuralNet(std::initializer_list<Layer> layers, int batchSize) : m_Layers(layers), m_BatchSize(batchSize)
+NeuralNet::NeuralNet(std::initializer_list<Layer> layers, int batchSize) : m_Layers(layers), m_BatchSize(batchSize), 
+	m_InputLayer(m_Layers[0].GetLayerSize(), m_Layers[0].GetLayerSize(), nullptr)
 {
 	size_t _max = 0;
 	// Pre-allocate memory
@@ -25,6 +26,7 @@ NeuralNet::NeuralNet(std::initializer_list<Layer> layers, int batchSize) : m_Lay
 
 	// Setup connections
 	{
+		m_Layers[0].SetBackwardConnection(&m_InputLayer);
 		for (int i = 1; i < m_Layers.size(); ++i)
 		{
 			m_Layers[i - 1].SetForwardConnection(&m_Layers[i]);

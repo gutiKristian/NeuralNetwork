@@ -9,7 +9,7 @@ class Layer
 {
 	using Matrix = std::vector<std::vector<double>>;
 public:
-	Layer(size_t In, size_t Size, ActivationFunction activationFunction) : m_In(In), m_Size(Size), m_ActivationFunction(activationFunction)
+	Layer(size_t In, size_t Size, ActivationFunction activationFunction) : m_In(In), m_Size(Size), m_ActivationFunc(activationFunction)
 	{
 		m_Weights.resize(m_In, std::vector<double>(m_Size));
 		Log();
@@ -39,7 +39,7 @@ public:
 					current += batches[k][j] * m_Weights[i][j];
 				}
 				m_Potentials[k][i] = current; // Keep potentials for back propagation
-				m_Outputs[k][i] = m_ActivationFunction(current);
+				m_Outputs[k][i] = m_ActivationFunc(current);
 			}
 		}
 
@@ -59,6 +59,7 @@ public:
 		assert(batchOutputs.size() == batchPredResult.size() && batchPredResult.size() > 0 && "Size mismatch!");
 		assert(batchOutputs[0].size() == batchPredResult[0].size() && batchPredResult[0].size() > 0 && "Size mismatch!");
 
+		//! BACKWARD PASS FOR OUTPUT LAYER. ITS SORT OF PREPARING INPUT FOR THE BACKWARD PASS
 		std::vector<double> gradients(batchOutputs[0].size(), 0); // can be preallocated
 
 		// For MSE -> E = sum(y_i - d_ki)
@@ -70,10 +71,23 @@ public:
 			}
 		}
 
+		//! BACKWARD PASS FOR HIDDEN LAYER, IT USES THE REC. FORMULA, ALSO TO UPDATE WEIGHTS BETWEEN OUTPUT AND LAST HIDDEN
+		//! WE USE PRECOMPUTED VALUE FROM OUTPUT AND SUBSTITUTE IT INTO FORMULA WHERE WE ALSO USE WEIGHTS THAT BELONG TO THIS LAYER
+
+		std::vector<double> gradientsNextLayer(p_PrevLayer->GetLayerSize(), 0);
+
+		for (int i = 0; i < gradientsNextLayer.size(); ++i)
+		{
+			for (int j = 0; j < gradients.size(); ++j)
+			{
+				gradientsNextLayer[i] += gradients[j] * m_ActivationPrimeFunc(0.0) * m_Weights[i][j];
+			}
+		}
+
 		if (!p_PrevLayer)
 		{
 			// Call another layer, this is going to be hidden
-			p_PrevLayer->BackwardPass(gradients);
+			p_PrevLayer->BackwardPass(gradientsNextLayer);
 		}
 	}
 
@@ -82,6 +96,17 @@ public:
 	*/
 	void BackwardPass(const std::vector<double>& derivedValues)
 	{
+
+		std::vector<double> gradientsNextLayer(p_PrevLayer->GetLayerSize(), 0);
+
+		for (int i = 0; i < gradientsNextLayer.size(); ++i)
+		{
+			for (int j = 0; j < derivedValues.size(); ++j)
+			{
+				gradientsNextLayer[i] += derivedValues[j] * m_ActivationPrimeFunc(0.0) * m_Weights[i][j];
+			}
+		}
+
 		if (!p_PrevLayer)
 		{
 			p_PrevLayer->BackwardPass(derivedValues);
@@ -121,7 +146,9 @@ private:
 	// Incoming inputs
 	size_t m_In = 0;
 	size_t m_Size = 0;
-	ActivationFunction m_ActivationFunction;
+	ActivationFunction m_ActivationFunc;
+	ActivationFunction m_ActivationPrimeFunc;
+
 	// Weights between this layer and layer below
 	Matrix m_Weights{};
 	// Potential and Outputs of current Layer
