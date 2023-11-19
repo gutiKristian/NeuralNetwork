@@ -9,9 +9,10 @@ class Layer
 {
 	using Matrix = std::vector<std::vector<double>>;
 public:
-	Layer(size_t In, size_t Size, ActivationFunction activationFunction) : m_In(In), m_Size(Size), m_ActivationFunc(activationFunction)
+	Layer(size_t In, size_t Size, ActivationFunction activationFunction) : m_InputSize(In), m_LayerSize(Size), m_ActivationFunc(activationFunction)
 	{
-		m_Weights.resize(m_In, std::vector<double>(m_Size));
+		m_Weights.resize(m_InputSize, std::vector<double>(m_LayerSize));
+		m_Bias.resize(m_LayerSize, 0.0);
 		Log();
 	};
 
@@ -20,24 +21,25 @@ public:
 	/*
 	* Input is 2D array of inputs -- batch
 	*/
-	void FeedForward(const Matrix& batches)
+	void Forward(const Matrix& batch)
 	{
-		assert(batches.size() > 0 && "Batch size must be > 0");
-		assert(m_In == batches[0].size());
+		assert(batch.size() > 0 && "Batch size must be > 0");
+		assert(m_InputSize == batch[0].size()); // assume its unifrom 2D array
 
-		auto batchesSize = batches.size();
+		auto batchSize = batch.size();
 		
 		// Compute for every input in the batch
-		for (int k = 0; k < batchesSize; ++k)
+		for (int k = 0; k < batchSize; ++k)
 		{
-			// Compute inner potential, traverse neuron by neuron
-			for (int i = 0; i < m_Size; ++i)
+			// Traverse neuron by neuron
+			for (int i = 0; i < m_LayerSize; ++i)
 			{
 				double current = 0.0;
-				for (int j = 0; j < m_In; ++j)
+				for (int j = 0; j < m_InputSize; ++j)
 				{
-					current += batches[k][j] * m_Weights[i][j];
+					current += batch[k][j] * m_Weights[i][j];
 				}
+				current += m_Bias[i];
 				m_Potentials[k][i] = current; // Keep potentials for back propagation
 				m_Outputs[k][i] = m_ActivationFunc(current);
 			}
@@ -45,7 +47,7 @@ public:
 
 		if (!p_NextLayer)
 		{
-			p_NextLayer->FeedForward(m_Outputs);
+			p_NextLayer->Forward(m_Outputs);
 		}
 	}
 
@@ -134,31 +136,32 @@ public:
 	void PreAllocateMem(int batchSize)
 	{
 		// Using resize on purpose so we can already access with []
-		m_Outputs.resize(batchSize, std::vector<double>(m_Size));
-		m_Potentials.resize(batchSize, std::vector<double>(m_Size));
+		m_Outputs.resize(batchSize, std::vector<double>(m_LayerSize));
+		m_Potentials.resize(batchSize, std::vector<double>(m_LayerSize));
 	}
 
 	inline const Matrix& GetOutputs() { return m_Outputs; }
 
-	inline size_t GetLayerSize() { return m_Size; }
+	inline size_t GetLayerSize() { return m_LayerSize; }
 
 private:
 	void Log()
 	{
 		std::cout << "Initialized Layer:\n";
-		std::cout << "\tInput size : " << m_In << "\n";
-		std::cout << "\tLayer size: " << m_Size << "\n";
+		std::cout << "\tInput size : " << m_InputSize << "\n";
+		std::cout << "\tLayer size: " << m_LayerSize << "\n";
 	}
 
 private:
 	// Incoming inputs
-	size_t m_In = 0;
-	size_t m_Size = 0;
+	size_t m_InputSize = 0;
+	size_t m_LayerSize = 0;
 	ActivationFunction m_ActivationFunc;
 	ActivationFunction m_ActivationPrimeFunc;
 
 	// Weights between this layer and layer below
 	Matrix m_Weights{};
+	std::vector<double> m_Bias;
 	// Potential and Outputs of current Layer
 	Matrix m_Potentials{};
 	Matrix m_Outputs{};
