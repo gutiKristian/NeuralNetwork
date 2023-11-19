@@ -43,7 +43,7 @@ void NeuralNet::Train(const std::vector<std::vector<double>>& batchInputs, const
 	auto& startLayer = m_Layers[0];
 	auto& outputLayer = m_Layers.back();
 
-	startLayer.FeedForward(batchInputs);
+	startLayer.Forward(batchInputs);
 
 #ifndef _DEBUG
 	std::cout << "Here calculate overall loss ?\n";
