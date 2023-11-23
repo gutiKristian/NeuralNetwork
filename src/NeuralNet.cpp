@@ -46,23 +46,14 @@ void NeuralNet::Train(const std::vector<std::vector<double>>& batchInputs, const
 	startLayer.Forward(batchInputs);
 
 #ifndef _DEBUG
-	std::cout << "Here calculate overall loss ?\n";
+	std::cout << "HAHA\n";
 	// Sum (batch - batchOutput) for every batch in batches and batchOutput in batchOutputs
 #endif
 
-	//outputLayer.BackwardPass();
+	outputLayer.Backward(batchOutputs, false);
 
 }
 
-void NeuralNet::ComputeErrorGrad(const std::vector<double>& netOutputs, const std::vector<double>& expctedOutputs, const std::vector<double>& inputs)
-{
-	size_t size = netOutputs.size();
-	for (int i = 0; i < size; ++i)
-	{
-		// MSE
-		m_Gradient[i] += (netOutputs[i] - expctedOutputs[i]);
-	}
-}
 
 double NeuralNet::ComputeError(const std::vector<double>& netOutputs, const std::vector<double>& expectedOutputs)
 {

@@ -10,10 +10,6 @@ public:
 	void Train(const std::vector<std::vector<double>>& batchInputs, const std::vector<std::vector<double>>& batchOutputs);
 
 	/*
-	* Accumulates gradient error for batch
-	*/
-	void ComputeErrorGrad(const std::vector<double>& netOutputs, const std::vector<double>& expctedOutputs, const std::vector<double>& inputs);
-	/*
 	* Computes error for one input
 	*/
 	double ComputeError(const std::vector<double>& netOutputs, const std::vector<double>& expctedOutputs);
