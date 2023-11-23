@@ -56,13 +56,13 @@ public:
 	* @batchPredResult: prediction made by network
 	* @batchOutputs: Ground truth
 	*/
-	void Backward(const Matrix& batchPredResult, const Matrix& batchOutputs)
+	void Backward(const Matrix& batchOutputs, bool showLoss)
 	{
-		assert(batchOutputs.size() == batchPredResult.size() && batchPredResult.size() > 0 && "Size mismatch!");
-		assert(batchOutputs[0].size() == batchPredResult[0].size() && batchPredResult[0].size() > 0 && "Size mismatch!");
+		assert(batchOutputs.size() == m_Outputs.size() && m_Outputs.size() > 0 && "Size mismatch!");
+		assert(batchOutputs[0].size() == m_Outputs[0].size() && m_Outputs[0].size() > 0 && "Size mismatch!");
 
-		auto batchSize = batchPredResult.size();
-		auto batchOutputSize = batchPredResult[0].size();
+		auto batchSize = m_Outputs.size();
+		auto batchOutputSize = m_Outputs[0].size();
 
 		Matrix gradients;
 		gradients.resize(batchSize, std::vector<double>(batchOutputSize, 0.0));
@@ -76,7 +76,7 @@ public:
 			//! Compute gradient
 			for (int i = 0; i < batchOutputSize; ++i)
 			{
-				gradients[k][i] = batchPredResult[k][i] - batchOutputs[k][i];
+				gradients[k][i] = m_Outputs[k][i] - batchOutputs[k][i];
 			}
 		}
 		//! 2D arrays of gradients
