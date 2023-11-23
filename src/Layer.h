@@ -52,74 +52,66 @@ public:
 	}
 
 	/*
-	* Top layer loss computation.
+	* Top layer loss computation. Prepares "input" for the backward pass.
 	* @batchPredResult: prediction made by network
-	* @batchOutputs: true values
+	* @batchOutputs: Ground truth
 	*/
-	void BackwardPass(const Matrix& batchPredResult, const Matrix& batchOutputs)
+	void Backward(const Matrix& batchPredResult, const Matrix& batchOutputs)
 	{
 		assert(batchOutputs.size() == batchPredResult.size() && batchPredResult.size() > 0 && "Size mismatch!");
 		assert(batchOutputs[0].size() == batchPredResult[0].size() && batchPredResult[0].size() > 0 && "Size mismatch!");
 
-		//! BACKWARD PASS FOR OUTPUT LAYER. ITS SORT OF PREPARING INPUT FOR THE BACKWARD PASS
-		std::vector<double> gradients(batchOutputs[0].size(), 0); // can be preallocated
-
 		auto batchSize = batchPredResult.size();
 		auto batchOutputSize = batchPredResult[0].size();
 
-		// For MSE -> E = sum(y_i - d_ki)
-		for (int i = 0; i < batchSize; ++i)
+		Matrix gradients; // can be preallocated
+		gradients.resize(batchSize, std::vector<double>(batchOutputSize, 0.0));
+
+		
+		// For MSE -> E = y_i - d_ki
+		
+		//! For each output
+		for (int k = 0; k < batchSize; ++k)
 		{
-			for (int j = 0; j < batchOutputSize; ++j)
+			//! Compute gradient
+			for (int i = 0; i < batchOutputSize; ++i)
 			{
-				gradients[j] += (batchPredResult[i][j] - batchOutputs[i][j]);
+				gradients[k][i] = batchPredResult[k][i] - batchOutputs[k][i];
 			}
 		}
+		//! 2D arrays of gradients
 
-		for (int i = 0; i < batchOutputSize; ++i)
-		{
-			gradients[i] /= batchSize;
-		}
-
-		//! BACKWARD PASS FOR HIDDEN LAYER, IT USES THE REC. FORMULA, ALSO TO UPDATE WEIGHTS BETWEEN OUTPUT AND LAST HIDDEN
-		//! WE USE PRECOMPUTED VALUE FROM OUTPUT AND SUBSTITUTE IT INTO FORMULA WHERE WE ALSO USE WEIGHTS THAT BELONG TO THIS LAYER
-
-		std::vector<double> gradientsNextLayer(p_PrevLayer->GetLayerSize(), 0);
-
-		for (int i = 0; i < gradientsNextLayer.size(); ++i)
-		{
-			for (int j = 0; j < gradients.size(); ++j)
-			{
-				gradientsNextLayer[i] += gradients[j] * m_ActivationPrimeFunc(0.0) * m_Weights[i][j];
-			}
-		}
-
-		if (!p_PrevLayer)
-		{
-			// Call another layer, this is going to be hidden
-			p_PrevLayer->BackwardPass(gradientsNextLayer);
-		}
+		Backward(gradients);
 	}
 
 	/*
 	* @derivedValues: derivation computed in the layer above
 	*/
-	void BackwardPass(const std::vector<double>& derivedValues)
+	void Backward(const Matrix& inputDerivation)
 	{
+		auto batchSize = inputDerivation.size();
+		auto prevLayerSize = p_PrevLayer->GetLayerSize();
 
-		std::vector<double> gradientsNextLayer(p_PrevLayer->GetLayerSize(), 0);
+		Matrix inputNextLayer;
+		inputNextLayer.resize(batchSize, std::vector<double>(prevLayerSize, 0.0));
 
-		for (int i = 0; i < gradientsNextLayer.size(); ++i)
+
+		for (int k = 0; k < batchSize; ++k)
 		{
-			for (int j = 0; j < derivedValues.size(); ++j)
+			for (int i = 0; i < prevLayerSize; ++i)
 			{
-				gradientsNextLayer[i] += derivedValues[j] * m_ActivationPrimeFunc(0.0) * m_Weights[i][j];
+				double current = 0.0;
+				for (int r = 0; r < m_LayerSize; ++r)
+				{
+					current += inputDerivation[k][r] * m_ActivationPrimeFunc(m_Potentials[k][r]) * m_Weights[i][r];
+				}
+				inputNextLayer[k][i] = current;
 			}
 		}
 
 		if (!p_PrevLayer)
 		{
-			p_PrevLayer->BackwardPass(derivedValues);
+			p_PrevLayer->Backward(inputDerivation);
 		}
 	}
 
