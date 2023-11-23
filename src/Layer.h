@@ -9,7 +9,8 @@ class Layer
 {
 	using Matrix = std::vector<std::vector<double>>;
 public:
-	Layer(size_t In, size_t Size, ActivationFunction activationFunction) : m_InputSize(In), m_LayerSize(Size), m_ActivationFunc(activationFunction)
+	Layer(size_t In, size_t Size, ActivationFunction activationFunction, ActivationFunction activationPrime) : 
+		m_InputSize(In), m_LayerSize(Size), m_ActivationFunc(activationFunction), m_ActivationPrimeFunc(activationPrime)
 	{
 		m_Weights.resize(m_InputSize, std::vector<double>(m_LayerSize));
 		m_Bias.resize(m_LayerSize, 0.0);
