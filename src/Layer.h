@@ -104,7 +104,7 @@ public:
 		auto prevLayerSize = p_PrevLayer->GetLayerSize();
 
 		Matrix inputNextLayer; // can be preallocated
-		inputNextLayer.resize(batchSize, std::vector<double>(prevLayerSize, 0.0));
+		inputNextLayer.resize(batchSize, std::vector<double>(m_LayerSize, 0.0));
 
 		// E_k / y_j
 		for (int k = 0; k < batchSize; ++k)
