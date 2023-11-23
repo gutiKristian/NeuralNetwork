@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <random>
 
 class Layer
 {
@@ -12,8 +13,9 @@ public:
 	Layer(size_t In, size_t Size, ActivationFunction activationFunction, ActivationFunction activationPrime) : 
 		m_InputSize(In), m_LayerSize(Size), m_ActivationFunc(activationFunction), m_ActivationPrimeFunc(activationPrime)
 	{
-		m_Weights.resize(m_InputSize, std::vector<double>(m_LayerSize));
+		m_Weights.resize(m_LayerSize, std::vector<double>(m_InputSize));
 		m_Bias.resize(m_LayerSize, 0.0);
+		InitWeights();
 		Log();
 	};
 
@@ -172,6 +174,27 @@ private:
 		std::cout << "Initialized Layer:\n";
 		std::cout << "\tInput size : " << m_InputSize << "\n";
 		std::cout << "\tLayer size: " << m_LayerSize << "\n";
+	}
+
+	void InitWeights()
+	{
+		std::random_device rd;
+		std::mt19937 gen(rd());
+
+		// Set the mean and standard deviation for the normal distribution
+		double mean = 0.0;
+		double stddev = 0.0001;
+
+		// Create a normal distribution
+		std::normal_distribution<double> distribution(mean, stddev);
+
+		for (auto& row : m_Weights)
+		{
+			for (auto& elem : row)
+			{
+				elem = distribution(gen);
+			}
+		}
 	}
 
 private:
