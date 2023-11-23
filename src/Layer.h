@@ -64,7 +64,7 @@ public:
 		auto batchSize = batchPredResult.size();
 		auto batchOutputSize = batchPredResult[0].size();
 
-		Matrix gradients; // can be preallocated
+		Matrix gradients;
 		gradients.resize(batchSize, std::vector<double>(batchOutputSize, 0.0));
 
 		
@@ -89,10 +89,12 @@ public:
 	*/
 	void Backward(const Matrix& inputDerivation)
 	{
+		assert(inputDerivation.size() > 0 && "Empty inputDerivation");
+
 		auto batchSize = inputDerivation.size();
 		auto prevLayerSize = p_PrevLayer->GetLayerSize();
 
-		Matrix inputNextLayer;
+		Matrix inputNextLayer; // can be preallocated
 		inputNextLayer.resize(batchSize, std::vector<double>(prevLayerSize, 0.0));
 
 
@@ -111,6 +113,20 @@ public:
 
 		if (!p_PrevLayer)
 		{
+			auto inputSize = inputDerivation[0].size();
+			// Update weights
+			const Matrix& y_i = p_PrevLayer->GetOutputs();
+			for (int k = 0; k < batchSize; ++k)
+			{
+				for (int i = 0; i < prevLayerSize; ++i)
+				{
+					for (int j = 0; j < inputSize; ++j)
+					{
+						m_Weights[i][j] -= m_LearningRate * inputDerivation[k][j] * m_ActivationPrimeFunc(m_Potentials[k][i]) * m_Outputs[k][i];
+					}
+				}
+			}
+
 			p_PrevLayer->Backward(inputDerivation);
 		}
 	}
@@ -157,6 +173,8 @@ private:
 	// Potential and Outputs of current Layer
 	Matrix m_Potentials{};
 	Matrix m_Outputs{};
+	// Backpropagation and learning
+	double m_LearningRate = 0.001;
 	//
 	Layer* p_NextLayer = nullptr;
 	Layer* p_PrevLayer = nullptr;
