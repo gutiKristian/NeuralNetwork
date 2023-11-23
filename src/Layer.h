@@ -103,7 +103,7 @@ public:
 		Matrix inputNextLayer; // can be preallocated
 		inputNextLayer.resize(batchSize, std::vector<double>(prevLayerSize, 0.0));
 
-
+		// E_k / y_j
 		for (int k = 0; k < batchSize; ++k)
 		{
 			for (int i = 0; i < prevLayerSize; ++i)
@@ -117,7 +117,7 @@ public:
 			}
 		}
 
-		
+		// E_k / w_ji
 		auto inputSize = inputDerivation[0].size();
 		// Update weights
 		const Matrix& y_i = p_PrevLayer->GetOutputs();
@@ -127,8 +127,17 @@ public:
 			{
 				for (int j = 0; j < inputSize; ++j)
 				{
-					m_Weights[i][j] -= m_LearningRate * inputDerivation[k][j] * m_ActivationPrimeFunc(m_Potentials[k][i]) * m_Outputs[k][i];
+					m_Weights[i][j] -= m_LearningRate * inputDerivation[k][j] * m_ActivationPrimeFunc(m_Potentials[k][i]) * y_i[k][i];
 				}
+			}
+		}
+
+		// Update biases on this layer
+		for (int k = 0; k < batchSize; ++k)
+		{
+			for (int i = 0; i < m_LayerSize; ++i)
+			{
+				m_Bias[i] -= m_LearningRate * inputDerivation[k][i] * m_ActivationPrimeFunc(m_Potentials[k][i]);
 			}
 		}
 
