@@ -91,6 +91,12 @@ public:
 	{
 		assert(inputDerivation.size() > 0 && "Empty inputDerivation");
 
+		// Is this ok ?
+		if (p_PrevLayer == nullptr)
+		{
+			return;
+		}
+
 		auto batchSize = inputDerivation.size();
 		auto prevLayerSize = p_PrevLayer->GetLayerSize();
 
@@ -111,24 +117,22 @@ public:
 			}
 		}
 
-		if (!p_PrevLayer)
+		
+		auto inputSize = inputDerivation[0].size();
+		// Update weights
+		const Matrix& y_i = p_PrevLayer->GetOutputs();
+		for (int k = 0; k < batchSize; ++k)
 		{
-			auto inputSize = inputDerivation[0].size();
-			// Update weights
-			const Matrix& y_i = p_PrevLayer->GetOutputs();
-			for (int k = 0; k < batchSize; ++k)
+			for (int i = 0; i < prevLayerSize; ++i)
 			{
-				for (int i = 0; i < prevLayerSize; ++i)
+				for (int j = 0; j < inputSize; ++j)
 				{
-					for (int j = 0; j < inputSize; ++j)
-					{
-						m_Weights[i][j] -= m_LearningRate * inputDerivation[k][j] * m_ActivationPrimeFunc(m_Potentials[k][i]) * m_Outputs[k][i];
-					}
+					m_Weights[i][j] -= m_LearningRate * inputDerivation[k][j] * m_ActivationPrimeFunc(m_Potentials[k][i]) * m_Outputs[k][i];
 				}
 			}
-
-			p_PrevLayer->Backward(inputDerivation);
 		}
+
+		p_PrevLayer->Backward(inputDerivation);
 	}
 
 	void SetForwardConnection(Layer* nextLayer)
