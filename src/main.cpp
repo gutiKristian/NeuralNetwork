@@ -11,8 +11,8 @@ int main()
 	std::vector<std::vector<double>> gt{ {2}, {12}, {18}, {22}, {40} };
 	
 	NeuralNet net({
-	Layer(2, 3, Identity, Identity), // add ptr to 
-	Layer(3, 1, Identity, Identity)
+	Layer(2, 2, Identity, Identity), // add ptr to 
+	Layer(2, 1, Identity, Identity)
 	}, batch.size());
 
 	net.Train(batch, gt);
