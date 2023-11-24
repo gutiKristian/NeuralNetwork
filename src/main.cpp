@@ -12,9 +12,10 @@ int main()
 	
 	NeuralNet net({
 	Layer(2, 2, Identity, Identity), // add ptr to 
-	Layer(2, 1, Identity, Identity)
+	Layer(2, 2, Identity, Identity)
 	}, batch.size());
 
 	net.Train(batch, gt);
+	std::cout << "Done!\n";
 	return 0;
 }

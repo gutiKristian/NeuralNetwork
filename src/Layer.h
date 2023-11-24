@@ -171,6 +171,9 @@ public:
 
 	inline const Matrix& GetOutputs() { return m_Outputs; }
 
+	// We do not want to copy the data, Layer class will never outlive the data
+	Matrix& SetOutput() { return m_Outputs; }
+
 	inline size_t GetLayerSize() { return m_LayerSize; }
 
 private:
