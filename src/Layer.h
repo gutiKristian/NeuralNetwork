@@ -101,36 +101,41 @@ public:
 		}
 
 		auto batchSize = inputDerivation.size();
-		auto prevLayerSize = p_PrevLayer->GetLayerSize();
+		// Next layer in backpropagation is layer that is previous to this one
+		auto nextLayerSize = p_PrevLayer->GetLayerSize();
 
 		Matrix inputNextLayer; // can be preallocated
-		inputNextLayer.resize(batchSize, std::vector<double>(m_LayerSize, 0.0));
+		inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
 
 		// E_k / y_j
 		for (int k = 0; k < batchSize; ++k)
 		{
-			for (int i = 0; i < prevLayerSize; ++i)
+			for (int i = 0; i < m_LayerSize; ++i)
 			{
 				double current = 0.0;
-				for (int r = 0; r < m_LayerSize; ++r)
+				for (int r = 0; r < nextLayerSize; ++r)
 				{
-					current += inputDerivation[k][r] * m_ActivationPrimeFunc(m_Potentials[k][r]) * m_Weights[i][r];
+					current += inputDerivation[k][i] * m_ActivationPrimeFunc(m_Potentials[k][i]) * m_Weights[i][r];
 				}
 				inputNextLayer[k][i] = current;
 			}
 		}
 
 		// E_k / w_ji
+		
+		// delete after debug
 		auto inputSize = inputDerivation[0].size();
+		assert(inputSize == m_LayerSize && "Passed");
+
 		// Update weights
 		const Matrix& y_i = p_PrevLayer->GetOutputs();
 		for (int k = 0; k < batchSize; ++k)
 		{
-			for (int i = 0; i < prevLayerSize; ++i)
+			for (int i = 0; i < m_LayerSize; ++i)
 			{
-				for (int j = 0; j < inputSize; ++j)
+				for (int j = 0; j < nextLayerSize; ++j)
 				{
-					m_Weights[i][j] -= m_LearningRate * inputDerivation[k][j] * m_ActivationPrimeFunc(m_Potentials[k][i]) * y_i[k][i];
+					m_Weights[i][j] -= m_LearningRate * inputDerivation[k][i] * m_ActivationPrimeFunc(m_Potentials[k][i]) * y_i[k][j];
 				}
 			}
 		}
@@ -144,7 +149,7 @@ public:
 			}
 		}
 
-		p_PrevLayer->Backward(inputDerivation);
+		p_PrevLayer->Backward(inputNextLayer);
 	}
 
 	void SetForwardConnection(Layer* nextLayer)
