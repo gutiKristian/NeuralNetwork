@@ -10,13 +10,13 @@ double UnitStepFunction(double potential)
 double LogisticSigmoid(double potential)
 {
 	double steepness = 1.0;
-	return 1 / (1 + std::exp(potential * steepness));
+	return 1.0 / (1.0 + std::exp(-potential * steepness));
 }
 
 double LogisticSigmoidPrime(double potential)
 {
 	double l = LogisticSigmoid(potential);
-	return l * (1 - l);
+	return l * (1.0 - l);
 }
 
 // hidden layer

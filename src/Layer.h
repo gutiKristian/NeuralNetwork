@@ -174,6 +174,8 @@ public:
 
 	inline size_t GetLayerSize() { return m_LayerSize; }
 
+	inline size_t GetInputSize() { return m_InputSize; }
+
 private:
 	
 	void InitWeights()
