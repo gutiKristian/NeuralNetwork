@@ -13,16 +13,16 @@ int main()
 
 	std::srand(std::time(0));
 
-	int batchSize = 64;
+	int batchSize = 1;
 
-	for (int j = 0; j < 1000; ++j)
+	for (int j = 0; j < 500; ++j)
 	{
 		batches.push_back({});
 		for (int i = 0; i < batchSize; ++i)
 		{
-			int randomInt1 = std::rand() % 1000 + 1; // Generates a random number between 1 and 100
-			int randomInt2 = std::rand() % 1000 + 1; // Generates a random number between 1 and 100
-			batches[j].push_back({ static_cast<double>(randomInt1), static_cast<double>(randomInt2) });
+			int randomInt1 = std::rand() % 500 + 1; // Generates a random number between 1 and 100
+			int randomInt2 = std::rand() % 500 + 1; // Generates a random number between 1 and 100
+			batches[j].push_back({ static_cast<double>(randomInt1 / 500.0), static_cast<double>(randomInt2 / 500.0) });
 		}
 	}
 	

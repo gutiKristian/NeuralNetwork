@@ -219,7 +219,7 @@ private:
 	Matrix m_Potentials{};
 	Matrix m_Outputs{};
 	// Backpropagation and learning
-	double m_LearningRate = 0.1;
+	double m_LearningRate = 0.01;
 	//
 	Layer* p_NextLayer = nullptr;
 	Layer* p_PrevLayer = nullptr;
