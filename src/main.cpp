@@ -2,20 +2,55 @@
 #include "NeuralNet.h"
 #include <iostream>
 #include <vector>
+#include <random>
+#include <ctime>
 
 int main()
 {
 	std::cout << "Neural network project\n";
 	
-	std::vector<std::vector<double>> batch{ {1, 1}, {10, 2}, {13, 5}, {14, 8},{17, 23} };
-	std::vector<std::vector<double>> gt{ {2}, {12}, {18}, {22}, {40} };
-	
-	NeuralNet net({
-	Layer(2, 2, Identity, Identity), // add ptr to 
-	Layer(2, 2, Identity, Identity)
-	}, batch.size());
+	std::vector< std::vector< std::vector<double> > > batches{};
 
-	net.Train(batch, gt);
+	std::srand(std::time(0));
+
+	int batchSize = 64;
+
+	for (int j = 0; j < 1000; ++j)
+	{
+		batches.push_back({});
+		for (int i = 0; i < batchSize; ++i)
+		{
+			int randomInt1 = std::rand() % 1000 + 1; // Generates a random number between 1 and 100
+			int randomInt2 = std::rand() % 1000 + 1; // Generates a random number between 1 and 100
+			batches[j].push_back({ static_cast<double>(randomInt1), static_cast<double>(randomInt2) });
+		}
+	}
+	
+
+	// generate this on the fly
+	std::vector<std::vector<double>> batchesOuts{};
+	batchesOuts.resize(batchSize, std::vector<double>(1, 0.0));
+
+	NeuralNet net({
+	Layer(2, 2, ReLu, ReLuPrime), // add ptr to 
+	Layer(2, 1, Identity, IdentityPrime)
+	}, batchSize);
+
+	for (int epoch = 0; epoch < 1000; ++epoch)
+	{
+		std::cout << "Epoch " << epoch << "\n";
+		for (const auto& batch : batches)
+		{
+			for (int k = 0; k < batchSize; ++k)
+			{
+				batchesOuts[k][0] = batch[k][0] + batch[k][1];
+			}
+
+			net.Train(batch, batchesOuts);
+		}
+		std::cout << "Error: " << net.ComputeError(batchesOuts) << "\n";
+	}
+
 	std::cout << "Done!\n";
 	return 0;
 }

@@ -48,7 +48,7 @@ public:
 			}
 		}
 
-		if (!p_NextLayer)
+		if (p_NextLayer != nullptr)
 		{
 			p_NextLayer->Forward(m_Outputs);
 		}
@@ -191,7 +191,7 @@ private:
 
 		// Set the mean and standard deviation for the normal distribution
 		double mean = 0.0;
-		double stddev = 0.0001;
+		double stddev = 0.001;
 
 		// Create a normal distribution
 		std::normal_distribution<double> distribution(mean, stddev);
@@ -219,7 +219,7 @@ private:
 	Matrix m_Potentials{};
 	Matrix m_Outputs{};
 	// Backpropagation and learning
-	double m_LearningRate = 0.001;
+	double m_LearningRate = 0.1;
 	//
 	Layer* p_NextLayer = nullptr;
 	Layer* p_PrevLayer = nullptr;
