@@ -56,6 +56,16 @@ void NeuralNet::Train(const std::vector<std::vector<double>>& batchInputs, const
 
 }
 
+void NeuralNet::Eval(const std::vector< std::vector<double> >& input, const std::vector < std::vector<double> > & output)
+{
+	auto& startLayer = m_Layers[0];
+	for (int i = 0; i < output.size(); ++i)
+	{
+		startLayer.Forward({ input[i] });
+		std::cout << input[i][0] << " XOR " << input[i][1] << " is " << m_Layers.back().GetOutputs()[0][0] << "\n";
+	}
+}
+
 
 double NeuralNet::ComputeError(const std::vector< std::vector<double> >& expectedOutputs)
 {

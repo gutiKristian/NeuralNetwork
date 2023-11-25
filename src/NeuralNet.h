@@ -9,6 +9,7 @@ public:
 public:
 	void Train(const std::vector<std::vector<double>>& batchInputs, const std::vector<std::vector<double>>& batchOutputs);
 
+	void Eval(const std::vector< std::vector<double> >& input, const std::vector < std::vector<double> >& output);
 	/*
 	* Computes error for one input
 	*/
