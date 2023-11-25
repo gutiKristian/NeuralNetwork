@@ -47,11 +47,6 @@ void NeuralNet::Train(const std::vector<std::vector<double>>& batchInputs, const
 
 	startLayer.Forward(batchInputs);
 
-#ifndef _DEBUG
-	std::cout << "HAHA\n";
-	// Sum (batch - batchOutput) for every batch in batches and batchOutput in batchOutputs
-#endif
-
 	outputLayer.Backward(batchOutputs, false);
 
 }

@@ -14,12 +14,8 @@ int main()
 		{{1, 0}}, {{0, 1}}, {{1, 1}}, {{0, 0}}
 	};
 
-	std::srand(std::time(0));
-
 	int batchSize = 1;
 
-
-	// generate this on the fly
 	std::vector<std::vector<std::vector<double>>> batchesOuts
 	{
 		{{1}}, {{1}}, {{0}}, {{0}}
