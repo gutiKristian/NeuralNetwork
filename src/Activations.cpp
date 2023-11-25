@@ -18,7 +18,17 @@ double ReLu(double potential)
 	return std::max(potential, 0.0);
 }
 
+double ReLuPrime(double potential)
+{
+	return potential > 0.0 ? 1.0 : 0.0;
+}
+
 double Identity(double potential)
 {
 	return potential;
+}
+
+double IdentityPrime(double potential)
+{
+	return 1.0;
 }

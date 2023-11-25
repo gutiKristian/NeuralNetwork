@@ -12,7 +12,7 @@ public:
 	/*
 	* Computes error for one input
 	*/
-	double ComputeError(const std::vector<double>& netOutputs, const std::vector<double>& expctedOutputs);
+	double ComputeError(const std::vector< std::vector<double> >& expectedOutputs);
 private:
 	std::vector<double> m_Gradient;
 	std::vector<Layer> m_Layers;

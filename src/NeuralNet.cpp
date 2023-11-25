@@ -57,13 +57,14 @@ void NeuralNet::Train(const std::vector<std::vector<double>>& batchInputs, const
 }
 
 
-double NeuralNet::ComputeError(const std::vector<double>& netOutputs, const std::vector<double>& expectedOutputs)
+double NeuralNet::ComputeError(const std::vector< std::vector<double> >& expectedOutputs)
 {
+	const auto& netOutputs = m_Layers.back().GetOutputs();
 	double error = 0.0;
 	size_t size = netOutputs.size();
 	for (int i = 0; i < size; ++i)
 	{
-		error += std::pow(netOutputs[i] - expectedOutputs[i], 2) * 0.5;
+		error += std::pow(netOutputs[i][0] - expectedOutputs[i][0], 2) * 0.5;
 	}
 
 	return error;
