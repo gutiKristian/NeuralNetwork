@@ -1,4 +1,5 @@
 #include "Activations.h"
+#include <cmath>
 
 double UnitStepFunction(double potential)
 {
@@ -10,6 +11,12 @@ double LogisticSigmoid(double potential)
 {
 	double steepness = 1.0;
 	return 1 / (1 + std::exp(potential * steepness));
+}
+
+double LogisticSigmoidPrime(double potential)
+{
+	double l = LogisticSigmoid(potential);
+	return l * (1 - l);
 }
 
 // hidden layer
@@ -31,4 +38,14 @@ double Identity(double potential)
 double IdentityPrime(double potential)
 {
 	return 1.0;
+}
+
+double Tanh(double potential)
+{
+	return std::tanh(potential);
+}
+
+double TanhPrime(double potential)
+{
+	return 1 - std::pow(std::tanh(potential), 2);
 }
