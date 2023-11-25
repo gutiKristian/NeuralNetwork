@@ -94,7 +94,6 @@ public:
 	{
 		assert(inputDerivation.size() > 0 && "Empty inputDerivation");
 
-		// Is this ok ?
 		if (p_PrevLayer == nullptr)
 		{
 			return;
@@ -110,14 +109,15 @@ public:
 		// E_k / y_j
 		for (int k = 0; k < batchSize; ++k)
 		{
-			for (int i = 0; i < m_LayerSize; ++i)
+
+			for (int j = 0; j < nextLayerSize; ++j)
 			{
-				double current = 0.0;
-				for (int r = 0; r < nextLayerSize; ++r)
+				double y_j = 0.0;
+				for (int r = 0; r < m_LayerSize; ++r)
 				{
-					current += inputDerivation[k][i] * m_ActivationPrimeFunc(m_Potentials[k][i]) * m_Weights[i][r];
+					y_j += inputDerivation[k][r] * m_ActivationPrimeFunc(m_Potentials[k][r]) * m_Weights[r][j];
 				}
-				inputNextLayer[k][i] = current;
+				inputNextLayer[k][j] = y_j;
 			}
 		}
 
@@ -219,7 +219,7 @@ private:
 	Matrix m_Potentials{};
 	Matrix m_Outputs{};
 	// Backpropagation and learning
-	double m_LearningRate = 0.01;
+	double m_LearningRate = 0.1;
 	//
 	Layer* p_NextLayer = nullptr;
 	Layer* p_PrevLayer = nullptr;
