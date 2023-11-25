@@ -3,7 +3,7 @@
 #include <cmath>
 
 NeuralNet::NeuralNet(std::initializer_list<Layer> layers, int batchSize) : m_Layers(layers), m_BatchSize(batchSize), 
-	m_InputLayer(m_Layers[0].GetLayerSize(), m_Layers[0].GetLayerSize(), nullptr, nullptr)
+	m_InputLayer(m_Layers[0].GetInputSize(), m_Layers[0].GetInputSize(), nullptr, nullptr)
 {
 	size_t _max = 0;
 	// Pre-allocate memory
@@ -46,11 +46,6 @@ void NeuralNet::Train(const std::vector<std::vector<double>>& batchInputs, const
 	inputLayerOut = batchInputs;
 
 	startLayer.Forward(batchInputs);
-
-#ifndef _DEBUG
-	std::cout << "HAHA\n";
-	// Sum (batch - batchOutput) for every batch in batches and batchOutput in batchOutputs
-#endif
 
 	outputLayer.Backward(batchOutputs, false);
 

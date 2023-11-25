@@ -11,27 +11,23 @@ int main()
 
 	std::vector< std::vector< std::vector<double> > > batches
 	{
-		{{1, 0}}, {{0, 1}}, {{1, 1}}, {{0, 0}}
+		{{1, 0}, {0, 1}, {1, 1}, {0, 0}}
 	};
 
-	std::srand(std::time(0));
+	int batchSize = 4;
 
-	int batchSize = 1;
-
-
-	// generate this on the fly
 	std::vector<std::vector<std::vector<double>>> batchesOuts
 	{
-		{{1}}, {{1}}, {{0}}, {{0}}
+		{{1}, {1}, {0}, {0}}
 	};
 	
 
 	NeuralNet net({
-	Layer(2, 2, ReLu, ReLuPrime),
-	Layer(2, 1, LogisticSigmoid, LogisticSigmoidPrime)
+	Layer(2, 5, ReLu, ReLuPrime),
+	Layer(5, 1, LogisticSigmoid, LogisticSigmoidPrime)
 		}, batchSize);
 
-	for (int epoch = 0; epoch < 10000; ++epoch)
+	for (int epoch = 0; epoch < 20000; ++epoch)
 	{
 		std::cout << "Epoch " << epoch << "\n";
 		for (int i = 0; i < batches.size(); ++i)

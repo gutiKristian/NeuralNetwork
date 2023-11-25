@@ -16,7 +16,6 @@ public:
 		m_Weights.resize(m_LayerSize, std::vector<double>(m_InputSize));
 		m_Bias.resize(m_LayerSize, 0.0);
 		InitWeights();
-		Log();
 	};
 
 public:
@@ -109,7 +108,6 @@ public:
 		// E_k / y_j
 		for (int k = 0; k < batchSize; ++k)
 		{
-
 			for (int j = 0; j < nextLayerSize; ++j)
 			{
 				double y_j = 0.0;
@@ -176,14 +174,10 @@ public:
 
 	inline size_t GetLayerSize() { return m_LayerSize; }
 
-private:
-	void Log()
-	{
-		std::cout << "Initialized Layer:\n";
-		std::cout << "\tInput size : " << m_InputSize << "\n";
-		std::cout << "\tLayer size: " << m_LayerSize << "\n";
-	}
+	inline size_t GetInputSize() { return m_InputSize; }
 
+private:
+	
 	void InitWeights()
 	{
 		std::random_device rd;
