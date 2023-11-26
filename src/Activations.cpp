@@ -63,3 +63,18 @@ void IdentityPrime(std::vector<double>& potentials)
 		potentials[i] = 1.0;
 	}
 }
+
+void Softmax(std::vector<double>& potentials)
+{
+	double _sum = 0.0;
+	for (auto& val : potentials)
+	{
+		val = std::exp(val);
+		_sum += val;
+	}
+
+	for (auto& val : potentials)
+	{
+		val /= _sum;
+	}
+}
