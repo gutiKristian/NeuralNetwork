@@ -22,3 +22,5 @@ void Identity(std::vector<double>& potentials);
 void IdentityPrime(std::vector<double>& potentials);
 
 void Softmax(std::vector<double>& potentials);
+
+void DoNothing(std::vector<double>& potentials);

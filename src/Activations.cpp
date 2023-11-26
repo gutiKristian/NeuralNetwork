@@ -78,3 +78,7 @@ void Softmax(std::vector<double>& potentials)
 		val /= _sum;
 	}
 }
+
+void DoNothing(std::vector<double>& potentials)
+{
+}
