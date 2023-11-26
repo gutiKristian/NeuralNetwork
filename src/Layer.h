@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <random>
+#include <algorithm>
 
 class Layer
 {
@@ -73,19 +74,21 @@ public:
 		gradients.resize(batchSize, std::vector<double>(batchOutputSize, 0.0));
 
 		
-		// For MSE -> E = y_i - d_ki
-		
+		std::vector<double> batchPredictions;
+		batchPredictions.resize(batchSize, 0.0);
+
 		//! For each output
 		for (int k = 0; k < batchSize; ++k)
 		{
 			//! Compute gradient
 			for (int i = 0; i < batchOutputSize; ++i)
 			{
-				gradients[k][i] = m_Outputs[k][i] - batchOutputs[k][i];
+				gradients[k][i] = (i == batchOutputs[k][i] ? 1.0 - m_Outputs[k][i] : 0.0 - m_Outputs[k][i]);
 			}
+			batchPredictions[k] = std::distance(gradients[k].begin(), std::max_element(gradients[k].begin(), gradients[k].end()));
 		}
-		//! 2D arrays of gradients
 
+		//! 2D arrays of gradients
 		Backward(gradients);
 	}
 
