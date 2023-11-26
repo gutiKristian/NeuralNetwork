@@ -2,25 +2,20 @@
 
 #include <cmath>
 #include <algorithm>
+#include <vector>
 
-using ActivationFunction = double (*)(double);
+using ActivationFunction = void (*)(std::vector<double>&);
 
-double UnitStepFunction(double potential);
+void UnitStepFunction(std::vector<double>& potentials);
 
-// output layer
-double LogisticSigmoid(double potential);
+void LogisticSigmoid(std::vector<double>& potentials);
 
-double LogisticSigmoidPrime(double potential);
+void LogisticSigmoidPrime(std::vector<double>& potentials);
 
-// hidden layer
-double ReLu(double potential);
+void ReLu(std::vector<double>& potentials);
 
-double ReLuPrime(double potential);
+void ReLuPrime(std::vector<double>& potentials);
 
-double Identity(double potential);
+void Identity(std::vector<double>& potentials);
 
-double IdentityPrime(double potential);
-
-double Tanh(double potential);
-
-double TanhPrime(double potential);
+void IdentityPrime(std::vector<double>& potentials);

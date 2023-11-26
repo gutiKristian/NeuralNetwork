@@ -43,8 +43,11 @@ public:
 				}
 				current += m_Bias[i];
 				m_Potentials[k][i] = current; // Keep potentials for back propagation
-				m_Outputs[k][i] = m_ActivationFunc(current);
+				m_Outputs[k][i] = current; // set outputs to potential as we will pass to activation func
+				m_PrimeOutputs[k][i] = current;
 			}
+			m_ActivationFunc(m_Outputs[k]); // call activation
+			m_ActivationPrimeFunc(m_PrimeOutputs[k]);
 		}
 
 		if (p_NextLayer != nullptr)
@@ -113,7 +116,7 @@ public:
 				double y_j = 0.0;
 				for (int r = 0; r < m_LayerSize; ++r)
 				{
-					y_j += inputDerivation[k][r] * m_ActivationPrimeFunc(m_Potentials[k][r]) * m_Weights[r][j];
+					y_j += inputDerivation[k][r] * m_PrimeOutputs[k][r] * m_Weights[r][j];
 				}
 				inputNextLayer[k][j] = y_j;
 			}
@@ -133,7 +136,7 @@ public:
 			{
 				for (int j = 0; j < nextLayerSize; ++j)
 				{
-					m_Weights[i][j] -= m_LearningRate * inputDerivation[k][i] * m_ActivationPrimeFunc(m_Potentials[k][i]) * y_i[k][j];
+					m_Weights[i][j] -= m_LearningRate * inputDerivation[k][i] * m_PrimeOutputs[k][i] * y_i[k][j];
 				}
 			}
 		}
@@ -143,7 +146,7 @@ public:
 		{
 			for (int i = 0; i < m_LayerSize; ++i)
 			{
-				m_Bias[i] -= m_LearningRate * inputDerivation[k][i] * m_ActivationPrimeFunc(m_Potentials[k][i]);
+				m_Bias[i] -= m_LearningRate * inputDerivation[k][i] * m_PrimeOutputs[k][i];
 			}
 		}
 
@@ -164,6 +167,7 @@ public:
 	{
 		// Using resize on purpose so we can already access with []
 		m_Outputs.resize(batchSize, std::vector<double>(m_LayerSize));
+		m_PrimeOutputs.resize(batchSize, std::vector<double>(m_LayerSize));
 		m_Potentials.resize(batchSize, std::vector<double>(m_LayerSize));
 	}
 
@@ -212,6 +216,7 @@ private:
 	// Potential and Outputs of current Layer
 	Matrix m_Potentials{};
 	Matrix m_Outputs{};
+	Matrix m_PrimeOutputs{};
 	// Backpropagation and learning
 	double m_LearningRate = 0.1;
 	//
