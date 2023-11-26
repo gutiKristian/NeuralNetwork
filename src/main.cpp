@@ -24,7 +24,7 @@ int main()
 
 	NeuralNet net({
 	Layer(2, 5, ReLu, ReLuPrime),
-	Layer(5, 1, LogisticSigmoid, LogisticSigmoidPrime)
+	Layer(5, 1, Softmax, Softmax)
 		}, batchSize);
 
 	for (int epoch = 0; epoch < 20000; ++epoch)

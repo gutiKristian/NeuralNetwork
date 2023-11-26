@@ -45,10 +45,9 @@ public:
 				current += m_Bias[i];
 				m_Potentials[k][i] = current; // Keep potentials for back propagation
 				m_Outputs[k][i] = current; // set outputs to potential as we will pass to activation func
-				m_PrimeOutputs[k][i] = current;
+				m_PrimeOutputs[k][i] = current; // this value is finally computed during backprop. with prime activation function
 			}
 			m_ActivationFunc(m_Outputs[k]); // call activation
-			m_ActivationPrimeFunc(m_PrimeOutputs[k]);
 		}
 
 		if (p_NextLayer != nullptr)
@@ -88,8 +87,36 @@ public:
 			batchPredictions[k] = std::distance(gradients[k].begin(), std::max_element(gradients[k].begin(), gradients[k].end()));
 		}
 
+		//////////////////////////////////////////////////////////////////////////
+
+		auto nextLayerSize = p_PrevLayer->GetLayerSize();
+		const Matrix& y_i = p_PrevLayer->GetOutputs();
+		for (int k = 0; k < batchSize; ++k)
+		{
+			for (int i = 0; i < m_LayerSize; ++i)
+			{
+				for (int j = 0; j < nextLayerSize; ++j)
+				{
+					m_Weights[i][j] -= m_LearningRate * gradients[k][i] * y_i[k][j];
+				}
+			}
+		}
+
+		// Update biases on this layer
+		for (int k = 0; k < batchSize; ++k)
+		{
+			for (int i = 0; i < m_LayerSize; ++i)
+			{
+				m_Bias[i] -= m_LearningRate * gradients[k][i];
+			}
+		}
+
+
+		//////////////////////////////////////////////////////////////////////////
+
+
 		//! 2D arrays of gradients
-		Backward(gradients);
+		p_PrevLayer->Backward(gradients);
 	}
 
 	/*
@@ -114,6 +141,9 @@ public:
 		// E_k / y_j
 		for (int k = 0; k < batchSize; ++k)
 		{
+			// Calculate the prime outputs
+			m_ActivationPrimeFunc(m_PrimeOutputs[k]);
+
 			for (int j = 0; j < nextLayerSize; ++j)
 			{
 				double y_j = 0.0;
