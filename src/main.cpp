@@ -5,6 +5,8 @@
 #include <random>
 #include <ctime>
 #include <fstream>
+#include <numeric>
+#include <algorithm>
 #include <sstream>
 
 
@@ -12,6 +14,42 @@
 #define BATCH_SIZE 1
 #define TRAINING_SIZE 10'000
 #define VALIDATION_SIZE 1000
+
+
+/*
+* Normalizes data and then scales them into [0, 1] interval.
+*/
+void NormalizeData(std::vector< std::vector<double> >& data)
+{
+	double mean = 0.0;
+	for (auto& img : data)
+	{
+		mean += std::accumulate(img.begin(), img.end(), 0.0);
+	}
+	mean /= static_cast<double>(data.size());
+
+	double stddev = 0.0;
+	for (auto& img : data)
+	{
+		for (const auto& value : img)
+		{
+			stddev += std::pow(value - mean, 2);
+		}
+	}
+
+	stddev = std::sqrt(stddev / static_cast<double>(data.size()));
+	
+	for (auto& img : data)
+	{
+		for (auto& value : img)
+		{
+			value = ((value - mean) / stddev) / 255.0;
+		}
+	}
+
+
+}
+
 
 void LoadMnistData(std::vector< std::vector<double>>& data, std::string name)
 {
