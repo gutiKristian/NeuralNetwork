@@ -42,11 +42,15 @@ public:
 				{
 					current += batch[k][j] * m_Weights[i][j];
 				}
+
 				current += m_Bias[i];
+				
 				m_Potentials[k][i] = current; // Keep potentials for back propagation
 				m_Outputs[k][i] = current; // set outputs to potential as we will pass to activation func
 				m_PrimeOutputs[k][i] = current; // this value is finally computed during backprop. with prime activation function
+			
 			}
+			
 			m_ActivationFunc(m_Outputs[k]); // call activation
 		}
 
