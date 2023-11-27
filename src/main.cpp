@@ -48,7 +48,6 @@ void LoadMnistData(std::vector< std::vector<double>>& data, std::string name)
 	file.close();
 }
 
-
 void LoadMnistDataLabels(std::vector<int>& labels, std::string name)
 {
 	std::string path = "../../../data/" + name;
