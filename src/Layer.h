@@ -61,9 +61,9 @@ public:
 	* @batchPredResult: prediction made by network
 	* @batchOutputs: Ground truth
 	*/
-	void Backward(const std::vector< std::vector<int> >& batchOutputs)
+	void Backward(const std::vector< std::vector<int> >& trueValuesBatch)
 	{
-		assert(batchOutputs.size() == m_Outputs.size() && m_Outputs.size() > 0 && "Size mismatch!");
+		assert(trueValuesBatch.size() == m_Outputs.size() && m_Outputs.size() > 0 && "Size mismatch!");
 
 
 		auto batchSize = m_Outputs.size();
@@ -72,19 +72,12 @@ public:
 		Matrix gradients;
 		gradients.resize(batchSize, std::vector<double>(batchOutputSize, 0.0));
 
-		
-		/*std::vector<double> batchPredictions;
-		batchPredictions.resize(batchSize, 0.0);*/
-
-		//! For each output
 		for (int k = 0; k < batchSize; ++k)
 		{
-			//! Compute gradient
 			for (int i = 0; i < batchOutputSize; ++i)
 			{
-				gradients[k][i] = (i == batchOutputs[k][0] ? 1.0 - m_Outputs[k][i] : 0.0 - m_Outputs[k][i]);
+				gradients[k][i] = (i == trueValuesBatch[k][0] ? 1.0 - m_Outputs[k][i] : 0.0 - m_Outputs[k][i]);
 			}
-			//batchPredictions[k] = std::distance(gradients[k].begin(), std::max_element(gradients[k].begin(), gradients[k].end()));
 		}
 
 		//////////////////////////////////////////////////////////////////////////
@@ -239,7 +232,7 @@ private:
 
 		// Set the mean and standard deviation for the normal distribution
 		double mean = 0.0;
-		double stddev = 0.001;
+		double stddev = 0.01;
 
 		// Create a normal distribution
 		std::normal_distribution<double> distribution(mean, stddev);
@@ -268,7 +261,7 @@ private:
 	Matrix m_Outputs{};
 	Matrix m_PrimeOutputs{};
 	// Backpropagation and learning
-	double m_LearningRate = 0.0001;
+	double m_LearningRate = 0.001;
 	//
 	Layer* p_NextLayer = nullptr;
 	Layer* p_PrevLayer = nullptr;

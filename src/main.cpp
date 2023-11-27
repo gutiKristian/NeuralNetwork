@@ -8,10 +8,10 @@
 #include <sstream>
 
 
-#define EPOCH_SIZE 8
+#define EPOCH_SIZE 100
 #define BATCH_SIZE 1
-#define TRAINING_SIZE 100
-#define VALIDATION_SIZE 20
+#define TRAINING_SIZE 60000
+#define VALIDATION_SIZE 6000
 
 void LoadMnistData(std::vector< std::vector<double>>& data, std::string name)
 {
@@ -34,7 +34,7 @@ void LoadMnistData(std::vector< std::vector<double>>& data, std::string name)
 
 		while (std::getline(ss, cell, ','))
 		{
-			row.push_back(std::stod(cell));
+			row.push_back(std::stod(cell) / 255.0);
 		}
 
 		data.push_back(row);
@@ -110,20 +110,21 @@ int main()
 				trainingLabels.push_back({ trainLabels[i + j] });
 			}
 
+			if (j % 1000 == 0)
+			{
+				std::cout << "Data : " << j << "\n";
+			}
 			net.Train(trainingData, trainingLabels);
 		}
 
+		std::vector<std::vector<double>> trainingData{};
+		std::vector<int> trainingLabels{};
 		for (int i = trainData.size() - VALIDATION_SIZE; i < trainData.size(); ++i)
 		{
-			std::vector<std::vector<double>> trainingData{};
-			std::vector<int> trainingLabels{};
-			for (int i = 0; i < BATCH_SIZE; ++i)
-			{
-				trainingData.push_back(trainData[i]);
-				trainingLabels.push_back(trainLabels[i]);
-			}
-			net.Eval(trainingData, trainLabels);
+			trainingData.push_back(trainData[i]);
+			trainingLabels.push_back(trainLabels[i]);
 		}
+		net.Eval(trainingData, trainingLabels);
 
 	}
 
