@@ -10,8 +10,8 @@
 
 #define EPOCH_SIZE 100
 #define BATCH_SIZE 1
-#define TRAINING_SIZE 60000
-#define VALIDATION_SIZE 6000
+#define TRAINING_SIZE 10'000
+#define VALIDATION_SIZE 1000
 
 void LoadMnistData(std::vector< std::vector<double>>& data, std::string name)
 {
@@ -92,13 +92,13 @@ int main()
 
 
 	NeuralNet net({
-	Layer(784, 256, ReLu, ReLuPrime),
-	Layer(256, 10, Softmax, DoNothing)
+	Layer(784, 64, ReLu, ReLuPrime),
+	Layer(64, 10, Softmax, DoNothing)
 		}, BATCH_SIZE);
 
 	for (int epoch = 0; epoch < EPOCH_SIZE; ++epoch)
 	{
-		std::cout << "Epoch " << epoch << "\n";
+		std::cout << "Epoch " << epoch+1 << "\n";
 		
 		for (int j = 0; j < trainData.size(); ++j)
 		{
@@ -110,10 +110,6 @@ int main()
 				trainingLabels.push_back({ trainLabels[i + j] });
 			}
 
-			if (j % 1000 == 0)
-			{
-				std::cout << "Data : " << j << "\n";
-			}
 			net.Train(trainingData, trainingLabels);
 		}
 

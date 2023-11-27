@@ -76,7 +76,7 @@ public:
 		{
 			for (int i = 0; i < batchOutputSize; ++i)
 			{
-				gradients[k][i] = (i == trueValuesBatch[k][0] ? 1.0 - m_Outputs[k][i] : 0.0 - m_Outputs[k][i]);
+				gradients[k][i] = (i == trueValuesBatch[k][0] ? m_Outputs[k][i] - 1.0 : m_Outputs[k][i]);
 			}
 		}
 
@@ -146,25 +146,6 @@ public:
 		Matrix inputNextLayer; // can be preallocated
 		inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
 
-
-		// E_k / y_j
-		// This has been already computed above
-		//for (int k = 0; k < batchSize; ++k)
-		//{
-		//	// Calculate the prime outputs
-		//	m_ActivationPrimeFunc(m_PrimeOutputs[k]);
-
-		//	for (int j = 0; j < nextLayerSize; ++j)
-		//	{
-		//		double y_j = 0.0;
-		//		for (int r = 0; r < m_LayerSize; ++r)
-		//		{
-		//			y_j += inputDerivation[k][r] * m_PrimeOutputs[k][r] * m_Weights[r][j];
-		//		}
-		//		inputNextLayer[k][j] = y_j;
-		//	}
-		//}
-
 		// E_k / w_ji
 		
 		// delete after debug
@@ -175,6 +156,8 @@ public:
 		const Matrix& y_i = p_PrevLayer->GetOutputs();
 		for (int k = 0; k < batchSize; ++k)
 		{
+			m_ActivationPrimeFunc(m_PrimeOutputs[k]);
+
 			for (int i = 0; i < m_LayerSize; ++i)
 			{
 				for (int j = 0; j < nextLayerSize; ++j)
@@ -232,7 +215,7 @@ private:
 
 		// Set the mean and standard deviation for the normal distribution
 		double mean = 0.0;
-		double stddev = 0.01;
+		double stddev = 0.001;
 
 		// Create a normal distribution
 		std::normal_distribution<double> distribution(mean, stddev);
