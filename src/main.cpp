@@ -34,7 +34,7 @@ void LoadMnistData(std::vector< std::vector<double>>& data, std::string name)
 
 		while (std::getline(ss, cell, ','))
 		{
-			row.push_back(std::stod(cell) / 255.0);
+			row.push_back((std::stod(cell) - 127.5) / 127.5);
 		}
 
 		data.push_back(row);
@@ -92,8 +92,8 @@ int main()
 
 
 	NeuralNet net({
-	Layer(784, 64, ReLu, ReLuPrime),
-	Layer(64, 10, Softmax, DoNothing)
+	Layer(784, 256, ReLu, ReLuPrime),
+	Layer(256, 10, Softmax, DoNothing)
 		}, BATCH_SIZE);
 
 	for (int epoch = 0; epoch < EPOCH_SIZE; ++epoch)

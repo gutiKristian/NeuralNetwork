@@ -65,7 +65,6 @@ public:
 	{
 		assert(trueValuesBatch.size() == m_Outputs.size() && m_Outputs.size() > 0 && "Size mismatch!");
 
-
 		auto batchSize = m_Outputs.size();
 		auto batchOutputSize = m_Outputs[0].size();
 
@@ -80,7 +79,9 @@ public:
 			}
 		}
 
-		//////////////////////////////////////////////////////////////////////////
+		/*
+		* Update weights and biases below output layer.
+		*/
 
 		auto nextLayerSize = p_PrevLayer->GetLayerSize();
 		const Matrix& y_i = p_PrevLayer->GetOutputs();
@@ -104,6 +105,9 @@ public:
 			}
 		}
 
+		/*
+		* Calculate y_j for next layer. This was derived from the slides.
+		*/
 		Matrix inputNextLayer;
 		inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
 
@@ -120,10 +124,6 @@ public:
 			}
 		}
 
-		//////////////////////////////////////////////////////////////////////////
-
-
-		//! 2D arrays of gradients
 		p_PrevLayer->Backward(inputNextLayer);
 	}
 
@@ -143,21 +143,38 @@ public:
 		// Next layer in backpropagation is layer that is previous to this one
 		auto nextLayerSize = p_PrevLayer->GetLayerSize();
 
-		Matrix inputNextLayer; // can be preallocated
-		inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
 
-		// E_k / w_ji
+		/*
+		* UNCOMMENT IF WANT TO USE MORE THAN ONE HIDDEN LAYER
+		* Compute gradients y_j based on the gradients computed above (that were passed here).
+		*/
 		
-		// delete after debug
-		auto inputSize = inputDerivation[0].size();
-		assert(inputSize == m_LayerSize && "Passed");
+		Matrix inputNextLayer; // can be preallocated
+		
+		//inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
 
-		// Update weights
+		//for (int k = 0; k < batchSize; ++k)
+		//{
+		//	m_ActivationPrimeFunc(m_PrimeOutputs[k]);
+
+		//	for (int j = 0; j < nextLayerSize; ++j)
+		//	{
+		//		double y_j = 0.0;
+		//		for (int r = 0; r < m_LayerSize; ++r)
+		//		{
+		//			y_j += inputDerivation[k][r] * m_PrimeOutputs[k][r] * m_Weights[r][j];
+		//		}
+		//		inputNextLayer[k][j] = y_j;
+		//	}
+		//}
+
+		/*
+		* Update the weights and biases.
+		*/
+
 		const Matrix& y_i = p_PrevLayer->GetOutputs();
 		for (int k = 0; k < batchSize; ++k)
 		{
-			m_ActivationPrimeFunc(m_PrimeOutputs[k]);
-
 			for (int i = 0; i < m_LayerSize; ++i)
 			{
 				for (int j = 0; j < nextLayerSize; ++j)
@@ -167,7 +184,6 @@ public:
 			}
 		}
 
-		// Update biases on this layer
 		for (int k = 0; k < batchSize; ++k)
 		{
 			for (int i = 0; i < m_LayerSize; ++i)
@@ -206,6 +222,8 @@ public:
 
 	inline size_t GetInputSize() { return m_InputSize; }
 
+	inline const Matrix& GetWeights() { return m_Weights; }
+
 private:
 	
 	void InitWeights()
@@ -215,7 +233,7 @@ private:
 
 		// Set the mean and standard deviation for the normal distribution
 		double mean = 0.0;
-		double stddev = 0.001;
+		double stddev = 0.01;
 
 		// Create a normal distribution
 		std::normal_distribution<double> distribution(mean, stddev);
@@ -244,7 +262,7 @@ private:
 	Matrix m_Outputs{};
 	Matrix m_PrimeOutputs{};
 	// Backpropagation and learning
-	double m_LearningRate = 0.001;
+	double m_LearningRate = 0.0001;
 	//
 	Layer* p_NextLayer = nullptr;
 	Layer* p_PrevLayer = nullptr;

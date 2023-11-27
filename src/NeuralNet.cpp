@@ -64,6 +64,7 @@ void NeuralNet::Eval(const std::vector< std::vector<double> >& input, const std:
 		int pred = std::distance(output[0].begin(), std::max_element(output[0].begin(), output[0].end()));
 		if (pred == trueValues[i]) ++hit;
 	}
+	std::cout << "Sample weight: " << lastLayer.GetWeights()[0][0] << "\n";
 	std::cout << "Accuracy: " << ((static_cast<double>(hit) / trueValues.size()) * 100) << "%\n";
 }
 
