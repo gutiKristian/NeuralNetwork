@@ -239,8 +239,7 @@ private:
 		double mean = 0.0;
 		double stddev = 0.01;
 
-		// Create a normal distribution
-		std::normal_distribution<double> distribution(mean, stddev);
+		std::normal_distribution<double> distribution(0.0f, std::sqrt(2 / (m_LayerSize + m_InputSize)));
 
 		for (auto& row : m_Weights)
 		{
