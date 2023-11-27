@@ -265,7 +265,7 @@ private:
 	Matrix m_Outputs{};
 	Matrix m_PrimeOutputs{};
 	// Backpropagation and learning
-	double m_LearningRate = 0.001;
+	double m_LearningRate = 0.0001;
 	//
 	Layer* p_NextLayer = nullptr;
 	Layer* p_PrevLayer = nullptr;
