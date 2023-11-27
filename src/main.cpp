@@ -10,10 +10,10 @@
 #include <sstream>
 
 
-#define EPOCH_SIZE 100
-#define BATCH_SIZE 1
-#define TRAINING_SIZE 10'000
-#define VALIDATION_SIZE 1000
+#define EPOCH_SIZE 10
+#define BATCH_SIZE 16
+#define TRAINING_SIZE 20'000
+#define VALIDATION_SIZE 2000
 
 
 /*
@@ -153,7 +153,7 @@ int main()
 	{
 		std::cout << "Epoch " << epoch+1 << "\n";
 		
-		for (int j = 0; j < trainData.size(); ++j)
+		for (int j = 0; j < trainData.size(); j += BATCH_SIZE)
 		{
 			std::vector<std::vector<double>> trainingData{};
 			std::vector <std::vector<int>> trainingLabels{};
