@@ -4,41 +4,128 @@
 #include <vector>
 #include <random>
 #include <ctime>
+#include <fstream>
+#include <sstream>
+
+
+#define EPOCH_SIZE 8
+#define BATCH_SIZE 1
+#define TRAINING_SIZE 100
+#define VALIDATION_SIZE 20
+
+void LoadMnistData(std::vector< std::vector<double>>& data, std::string name)
+{
+	std::string path = "../../../data/" + name;
+	std::ifstream file(path);
+
+	if (!file.is_open())
+	{
+		std::cerr << "Error opening file: " << path << std::endl;
+	}
+
+	std::string line;
+
+	// Read each line from the CSV file
+	while (std::getline(file, line))
+	{
+		std::vector<double> row;
+		std::stringstream ss(line);
+		std::string cell;
+
+		while (std::getline(ss, cell, ','))
+		{
+			row.push_back(std::stod(cell));
+		}
+
+		data.push_back(row);
+		if (data.size() == TRAINING_SIZE)
+		{
+			break;
+		}
+	}
+
+	// Close the file
+	file.close();
+}
+
+
+void LoadMnistDataLabels(std::vector<int>& labels, std::string name)
+{
+	std::string path = "../../../data/" + name;
+	std::ifstream file(path);
+
+	if (!file.is_open())
+	{
+		std::cerr << "Error opening file: " << path << std::endl;
+	}
+
+	std::string line;
+
+	// Read each line from the CSV file
+	while (std::getline(file, line))
+	{
+		// Convert the line to an integer and add it to the data vector
+		labels.push_back(std::stoi(line));
+
+		if (labels.size() == TRAINING_SIZE)
+		{
+			break;
+		}
+	}	
+
+	// Close the file
+	file.close();
+}
+
 
 int main()
 {
 	std::cout << "Neural network project\n";
 
-	std::vector< std::vector< std::vector<double> > > batches
-	{
-		{{1, 0}, {0, 1}, {1, 1}, {0, 0}}
-	};
-
-	int batchSize = 4;
-
-	std::vector<std::vector<std::vector<double>>> batchesOuts
-	{
-		{{1}, {1}, {0}, {0}}
-	};
 	
+	std::vector< std::vector<double> > trainData;
+	std::vector<int> trainLabels;
+
+	LoadMnistData(trainData, "fashion_mnist_train_vectors.csv");
+	LoadMnistDataLabels(trainLabels, "fashion_mnist_train_labels.csv");
+
+
 
 	NeuralNet net({
-	Layer(2, 5, ReLu, ReLuPrime),
-	Layer(5, 1, Softmax, Softmax)
-		}, batchSize);
+	Layer(784, 256, ReLu, ReLuPrime),
+	Layer(256, 10, Softmax, DoNothing)
+		}, BATCH_SIZE);
 
-	for (int epoch = 0; epoch < 20000; ++epoch)
+	for (int epoch = 0; epoch < EPOCH_SIZE; ++epoch)
 	{
 		std::cout << "Epoch " << epoch << "\n";
-		for (int i = 0; i < batches.size(); ++i)
+		
+		for (int j = 0; j < trainData.size(); ++j)
 		{
-			net.Train(batches[i], batchesOuts[i]);
-			std::cout << "Error: " << net.ComputeError(batchesOuts[i]) << "\n";
+			std::vector<std::vector<double>> trainingData{};
+			std::vector <std::vector<int>> trainingLabels{};
+			for (int i = 0; i < BATCH_SIZE; ++i)
+			{
+				trainingData.push_back(trainData[i + j]);
+				trainingLabels.push_back({ trainLabels[i + j] });
+			}
+
+			net.Train(trainingData, trainingLabels);
 		}
+
+		for (int i = trainData.size() - VALIDATION_SIZE; i < trainData.size(); ++i)
+		{
+			std::vector<std::vector<double>> trainingData{};
+			std::vector<int> trainingLabels{};
+			for (int i = 0; i < BATCH_SIZE; ++i)
+			{
+				trainingData.push_back(trainingData[i]);
+				trainingLabels.push_back(trainLabels[i]);
+			}
+			net.Eval(trainingData, trainLabels);
+		}
+
 	}
-
-
-	net.Eval({ {1, 0}, {0, 0}, {0, 1}, {1, 1} }, { {1}, {0}, {1}, {0} });
 
 	std::cout << "Done!\n";
 	return 0;

@@ -27,7 +27,7 @@ public:
 	void Forward(const Matrix& batch)
 	{
 		assert(batch.size() > 0 && "Batch size must be > 0");
-		assert(m_InputSize == batch[0].size()); // assume its unifrom 2D array
+		assert(m_InputSize == batch[0].size()); // assume its uniform 2D array
 
 		auto batchSize = batch.size();
 		
@@ -61,10 +61,10 @@ public:
 	* @batchPredResult: prediction made by network
 	* @batchOutputs: Ground truth
 	*/
-	void Backward(const Matrix& batchOutputs, bool showLoss)
+	void Backward(const std::vector< std::vector<int> >& batchOutputs)
 	{
 		assert(batchOutputs.size() == m_Outputs.size() && m_Outputs.size() > 0 && "Size mismatch!");
-		assert(batchOutputs[0].size() == m_Outputs[0].size() && m_Outputs[0].size() > 0 && "Size mismatch!");
+
 
 		auto batchSize = m_Outputs.size();
 		auto batchOutputSize = m_Outputs[0].size();
@@ -73,8 +73,8 @@ public:
 		gradients.resize(batchSize, std::vector<double>(batchOutputSize, 0.0));
 
 		
-		std::vector<double> batchPredictions;
-		batchPredictions.resize(batchSize, 0.0);
+		/*std::vector<double> batchPredictions;
+		batchPredictions.resize(batchSize, 0.0);*/
 
 		//! For each output
 		for (int k = 0; k < batchSize; ++k)
@@ -82,9 +82,9 @@ public:
 			//! Compute gradient
 			for (int i = 0; i < batchOutputSize; ++i)
 			{
-				gradients[k][i] = (i == batchOutputs[k][i] ? 1.0 - m_Outputs[k][i] : 0.0 - m_Outputs[k][i]);
+				gradients[k][i] = (i == batchOutputs[k][0] ? 1.0 - m_Outputs[k][i] : 0.0 - m_Outputs[k][i]);
 			}
-			batchPredictions[k] = std::distance(gradients[k].begin(), std::max_element(gradients[k].begin(), gradients[k].end()));
+			//batchPredictions[k] = std::distance(gradients[k].begin(), std::max_element(gradients[k].begin(), gradients[k].end()));
 		}
 
 		//////////////////////////////////////////////////////////////////////////
@@ -138,6 +138,8 @@ public:
 		Matrix inputNextLayer; // can be preallocated
 		inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
 
+
+		// PROBLEM IS HERE
 		// E_k / y_j
 		for (int k = 0; k < batchSize; ++k)
 		{
