@@ -119,7 +119,7 @@ int main()
 			std::vector<int> trainingLabels{};
 			for (int i = 0; i < BATCH_SIZE; ++i)
 			{
-				trainingData.push_back(trainingData[i]);
+				trainingData.push_back(trainData[i]);
 				trainingLabels.push_back(trainLabels[i]);
 			}
 			net.Eval(trainingData, trainLabels);

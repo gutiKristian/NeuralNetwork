@@ -57,7 +57,7 @@ void NeuralNet::Eval(const std::vector< std::vector<double> >& input, const std:
 	auto& lastLayer = m_Layers.back();
 	int hit = 0;
 	
-	for (int i = 0; i < trueValues.size(); ++i)
+	for (int i = 0; i < input.size(); ++i)
 	{
 		startLayer.Forward({ input[i] });
 		auto& output = lastLayer.GetOutputs();

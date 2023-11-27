@@ -111,12 +111,27 @@ public:
 			}
 		}
 
+		Matrix inputNextLayer;
+		inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
+
+		for (int k = 0; k < batchSize; ++k)
+		{
+			for (int l = 0; l < nextLayerSize; ++l)
+			{
+				double y_l = 0.0;
+				for (int i = 0; i < m_LayerSize; ++i)
+				{
+					y_l += gradients[k][i] * m_Weights[i][l];
+				}
+				inputNextLayer[k][l] = y_l;
+			}
+		}
 
 		//////////////////////////////////////////////////////////////////////////
 
 
 		//! 2D arrays of gradients
-		p_PrevLayer->Backward(gradients);
+		p_PrevLayer->Backward(inputNextLayer);
 	}
 
 	/*
@@ -139,23 +154,23 @@ public:
 		inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
 
 
-		// PROBLEM IS HERE
 		// E_k / y_j
-		for (int k = 0; k < batchSize; ++k)
-		{
-			// Calculate the prime outputs
-			m_ActivationPrimeFunc(m_PrimeOutputs[k]);
+		// This has been already computed above
+		//for (int k = 0; k < batchSize; ++k)
+		//{
+		//	// Calculate the prime outputs
+		//	m_ActivationPrimeFunc(m_PrimeOutputs[k]);
 
-			for (int j = 0; j < nextLayerSize; ++j)
-			{
-				double y_j = 0.0;
-				for (int r = 0; r < m_LayerSize; ++r)
-				{
-					y_j += inputDerivation[k][r] * m_PrimeOutputs[k][r] * m_Weights[r][j];
-				}
-				inputNextLayer[k][j] = y_j;
-			}
-		}
+		//	for (int j = 0; j < nextLayerSize; ++j)
+		//	{
+		//		double y_j = 0.0;
+		//		for (int r = 0; r < m_LayerSize; ++r)
+		//		{
+		//			y_j += inputDerivation[k][r] * m_PrimeOutputs[k][r] * m_Weights[r][j];
+		//		}
+		//		inputNextLayer[k][j] = y_j;
+		//	}
+		//}
 
 		// E_k / w_ji
 		
@@ -253,7 +268,7 @@ private:
 	Matrix m_Outputs{};
 	Matrix m_PrimeOutputs{};
 	// Backpropagation and learning
-	double m_LearningRate = 0.1;
+	double m_LearningRate = 0.0001;
 	//
 	Layer* p_NextLayer = nullptr;
 	Layer* p_PrevLayer = nullptr;
