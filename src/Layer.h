@@ -155,22 +155,22 @@ public:
 		
 		Matrix inputNextLayer; // can be preallocated
 		
-		//inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
+		inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
 
-		//for (int k = 0; k < batchSize; ++k)
-		//{
-		//	m_ActivationPrimeFunc(m_PrimeOutputs[k]);
+		for (int k = 0; k < batchSize; ++k)
+		{
+			m_ActivationPrimeFunc(m_PrimeOutputs[k]);
 
-		//	for (int j = 0; j < nextLayerSize; ++j)
-		//	{
-		//		double y_j = 0.0;
-		//		for (int r = 0; r < m_LayerSize; ++r)
-		//		{
-		//			y_j += inputDerivation[k][r] * m_PrimeOutputs[k][r] * m_Weights[r][j];
-		//		}
-		//		inputNextLayer[k][j] = y_j;
-		//	}
-		//}
+			for (int j = 0; j < nextLayerSize; ++j)
+			{
+				double y_j = 0.0;
+				for (int r = 0; r < m_LayerSize; ++r)
+				{
+					y_j += inputDerivation[k][r] * m_PrimeOutputs[k][r] * m_Weights[r][j];
+				}
+				inputNextLayer[k][j] = y_j;
+			}
+		}
 
 		/*
 		* Update the weights and biases.
@@ -237,9 +237,9 @@ private:
 
 		// Set the mean and standard deviation for the normal distribution
 		double mean = 0.0;
-		double stddev = 0.01;
-
-		std::normal_distribution<double> distribution(0.0f, std::sqrt(2 / (m_LayerSize + m_InputSize)));
+		double stddev = 0.001;
+		//std::normal_distribution<double> distribution(mean, stddev);
+		std::normal_distribution<double> distribution(0.0f, std::sqrt(2.0 / (m_LayerSize + m_InputSize)));
 
 		for (auto& row : m_Weights)
 		{
@@ -265,7 +265,7 @@ private:
 	Matrix m_Outputs{};
 	Matrix m_PrimeOutputs{};
 	// Backpropagation and learning
-	double m_LearningRate = 0.0001;
+	double m_LearningRate = 0.001;
 	//
 	Layer* p_NextLayer = nullptr;
 	Layer* p_PrevLayer = nullptr;
