@@ -84,7 +84,7 @@ void LoadMnistData(std::vector< std::vector<double>>& data, std::string name)
 
 		while (std::getline(ss, cell, ','))
 		{
-			row.push_back(std::stod(cell) / 255.0);
+			row.push_back(std::stod(cell));
 		}
 
 		data.push_back(row);

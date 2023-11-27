@@ -22,6 +22,30 @@ public:
 
 public:
 
+	std::vector<double> AverageArray(const Matrix& arr)
+	{
+		assert(arr.size() > 0);
+
+		std::vector<double> out{};
+		out.resize(arr[0].size(), 0.0);
+		auto arrSize = arr[0].size();
+
+		for (int k = 0; k < arr.size(); ++k)
+		{
+			for (int i = 0; i < arrSize; ++i)
+			{
+				out[i] += arr[k][i];
+			}
+		}
+
+		for (auto& elem : out)
+		{
+			elem /= arrSize;
+		}
+
+		return out;
+	}
+
 	/*
 	* Input is 2D array of inputs -- batch
 	*/
@@ -76,6 +100,7 @@ public:
 		Matrix gradients;
 		gradients.resize(batchSize, std::vector<double>(batchOutputSize, 0.0));
 
+		// Compute gradient for each batch
 		for (int k = 0; k < batchSize; ++k)
 		{
 			for (int i = 0; i < batchOutputSize; ++i)
@@ -156,22 +181,22 @@ public:
 		
 		Matrix inputNextLayer; // can be preallocated
 		
-		inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
+		//inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
 
-		for (int k = 0; k < batchSize; ++k)
-		{
-			m_ActivationPrimeFunc(m_PrimeOutputs[k]);
+		//for (int k = 0; k < batchSize; ++k)
+		//{
+		//	m_ActivationPrimeFunc(m_PrimeOutputs[k]);
 
-			for (int j = 0; j < nextLayerSize; ++j)
-			{
-				double y_j = 0.0;
-				for (int r = 0; r < m_LayerSize; ++r)
-				{
-					y_j += inputDerivation[k][r] * m_PrimeOutputs[k][r] * m_Weights[r][j];
-				}
-				inputNextLayer[k][j] = y_j;
-			}
-		}
+		//	for (int j = 0; j < nextLayerSize; ++j)
+		//	{
+		//		double y_j = 0.0;
+		//		for (int r = 0; r < m_LayerSize; ++r)
+		//		{
+		//			y_j += inputDerivation[k][r] * m_PrimeOutputs[k][r] * m_Weights[r][j];
+		//		}
+		//		inputNextLayer[k][j] = y_j;
+		//	}
+		//}
 
 		/*
 		* Update the weights and biases.
@@ -238,7 +263,7 @@ private:
 
 		// Set the mean and standard deviation for the normal distribution
 		double mean = 0.0;
-		double stddev = 0.001;
+		double stddev = 0.0001;
 		//std::normal_distribution<double> distribution(mean, stddev);
 		std::normal_distribution<double> distribution(0.0f, std::sqrt(2.0 / (m_LayerSize + m_InputSize)));
 
@@ -267,7 +292,7 @@ private:
 	Matrix m_PrimeOutputs{};
 	Matrix m_Momentum{};
 	// Backpropagation and learning
-	double m_LearningRate = 0.0001;
+	double m_LearningRate = 0.00001;
 	double m_MomentumAlpha = 0.1;
 	//
 	Layer* p_NextLayer = nullptr;
