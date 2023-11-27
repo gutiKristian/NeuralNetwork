@@ -21,6 +21,7 @@
 */
 void NormalizeData(std::vector< std::vector<double> >& data)
 {
+	std::cout << "Normalizing...";
 	double mean = 0.0;
 	for (auto& img : data)
 	{
@@ -43,17 +44,28 @@ void NormalizeData(std::vector< std::vector<double> >& data)
 	{
 		for (auto& value : img)
 		{
-			value = ((value - mean) / stddev) / 255.0;
+			value = (value - mean) / stddev;
 		}
 	}
 
+	for (auto& img : data)
+	{
+		double minElement = *std::min_element(img.begin(), img.end());
+		double maxElement = *std::max_element(img.begin(), img.end());
+		for (auto& value : img)
+		{
+			value = (value - minElement) / (maxElement - minElement);
+		}
 
+	}
+	std::cout << "Done\n";
 }
 
 
 void LoadMnistData(std::vector< std::vector<double>>& data, std::string name)
 {
 	std::string path = "../../../data/" + name;
+	std::cout << "Loading: " << path << "...";
 	std::ifstream file(path);
 
 	if (!file.is_open())
@@ -84,11 +96,13 @@ void LoadMnistData(std::vector< std::vector<double>>& data, std::string name)
 
 	// Close the file
 	file.close();
+	std::cout << "Done\n";
 }
 
 void LoadMnistDataLabels(std::vector<int>& labels, std::string name)
 {
 	std::string path = "../../../data/" + name;
+	std::cout << "Loading: " << path << "...";
 	std::ifstream file(path);
 
 	if (!file.is_open())
@@ -112,6 +126,7 @@ void LoadMnistDataLabels(std::vector<int>& labels, std::string name)
 
 	// Close the file
 	file.close();
+	std::cout << "Done\n";
 }
 
 
@@ -126,6 +141,7 @@ int main()
 	LoadMnistData(trainData, "fashion_mnist_train_vectors.csv");
 	LoadMnistDataLabels(trainLabels, "fashion_mnist_train_labels.csv");
 
+	NormalizeData(trainData);
 
 
 	NeuralNet net({
