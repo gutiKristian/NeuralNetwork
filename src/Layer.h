@@ -15,6 +15,7 @@ public:
 		m_InputSize(In), m_LayerSize(Size), m_ActivationFunc(activationFunction), m_ActivationPrimeFunc(activationPrime)
 	{
 		m_Weights.resize(m_LayerSize, std::vector<double>(m_InputSize));
+		m_Momentum.resize(m_LayerSize, std::vector<double>(m_InputSize, 0.0));
 		m_Bias.resize(m_LayerSize, 0.0);
 		InitWeights();
 	};
@@ -264,8 +265,10 @@ private:
 	Matrix m_Potentials{};
 	Matrix m_Outputs{};
 	Matrix m_PrimeOutputs{};
+	Matrix m_Momentum{};
 	// Backpropagation and learning
 	double m_LearningRate = 0.0001;
+	double m_MomentumAlpha = 0.1;
 	//
 	Layer* p_NextLayer = nullptr;
 	Layer* p_PrevLayer = nullptr;
