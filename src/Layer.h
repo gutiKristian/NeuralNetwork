@@ -22,6 +22,30 @@ public:
 
 public:
 
+	std::vector<double> AverageArray(const Matrix& arr)
+	{
+		assert(arr.size() > 0);
+
+		std::vector<double> out{};
+		out.resize(arr[0].size(), 0.0);
+		auto arrSize = arr[0].size();
+
+		for (int k = 0; k < arr.size(); ++k)
+		{
+			for (int i = 0; i < arrSize; ++i)
+			{
+				out[i] += arr[k][i];
+			}
+		}
+
+		for (auto& elem : out)
+		{
+			elem /= arrSize;
+		}
+
+		return out;
+	}
+
 	/*
 	* Input is 2D array of inputs -- batch
 	*/
@@ -76,6 +100,7 @@ public:
 		Matrix gradients;
 		gradients.resize(batchSize, std::vector<double>(batchOutputSize, 0.0));
 
+		// Compute gradient for each batch
 		for (int k = 0; k < batchSize; ++k)
 		{
 			for (int i = 0; i < batchOutputSize; ++i)
@@ -90,28 +115,39 @@ public:
 
 		auto nextLayerSize = p_PrevLayer->GetLayerSize();
 		const Matrix& y_i = p_PrevLayer->GetOutputs();
-		for (int k = 0; k < batchSize; ++k)
+
+		for (int i = 0; i < m_LayerSize; ++i)
 		{
-			for (int i = 0; i < m_LayerSize; ++i)
+			for (int j = 0; j < nextLayerSize; ++j)
 			{
-				for (int j = 0; j < nextLayerSize; ++j)
+				double weigthDer = 0.0;
+				// E = sum(Ek)
+				for (int k = 0; k < batchSize; ++k)
 				{
-					m_Weights[i][j] -= m_LearningRate * gradients[k][i] * y_i[k][j];
+					weigthDer += gradients[k][i] * y_i[k][j] + m_Momentum[i][j] * m_MomentumAlpha;
 				}
+
+				weigthDer /= batchSize;
+				m_Weights[i][j] -= m_LearningRate * weigthDer;
+				m_Momentum[i][j] = -weigthDer;
 			}
 		}
 
 		// Update biases on this layer
-		for (int k = 0; k < batchSize; ++k)
+		for (int i = 0; i < m_LayerSize; ++i)
 		{
-			for (int i = 0; i < m_LayerSize; ++i)
+			double biasDer = 0.0;
+			for (int k = 0; k < batchSize; ++k)
 			{
-				m_Bias[i] -= m_LearningRate * gradients[k][i];
+				biasDer += gradients[k][i];
 			}
+			biasDer /= batchSize;
+			m_Bias[i] -= m_LearningRate * biasDer;
 		}
 
 		/*
 		* Calculate y_j for next layer. This was derived from the slides.
+		* Keep this derivations in batch form as we will average them during the learning phase. (For now ???)
 		*/
 		Matrix inputNextLayer;
 		inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
@@ -137,12 +173,14 @@ public:
 	*/
 	void Backward(const Matrix& inputDerivation)
 	{
-		assert(inputDerivation.size() > 0 && "Empty inputDerivation");
 
 		if (p_PrevLayer == nullptr)
 		{
 			return;
 		}
+
+		assert(inputDerivation.size() > 0 && "Empty inputDerivation");
+
 
 		auto batchSize = inputDerivation.size();
 		// Next layer in backpropagation is layer that is previous to this one
@@ -156,45 +194,52 @@ public:
 		
 		Matrix inputNextLayer; // can be preallocated
 		
-		inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
+		//inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
 
-		for (int k = 0; k < batchSize; ++k)
-		{
-			m_ActivationPrimeFunc(m_PrimeOutputs[k]);
+		//for (int k = 0; k < batchSize; ++k)
+		//{
+		//	m_ActivationPrimeFunc(m_PrimeOutputs[k]);
 
-			for (int j = 0; j < nextLayerSize; ++j)
-			{
-				double y_j = 0.0;
-				for (int r = 0; r < m_LayerSize; ++r)
-				{
-					y_j += inputDerivation[k][r] * m_PrimeOutputs[k][r] * m_Weights[r][j];
-				}
-				inputNextLayer[k][j] = y_j;
-			}
-		}
+		//	for (int j = 0; j < nextLayerSize; ++j)
+		//	{
+		//		double y_j = 0.0;
+		//		for (int r = 0; r < m_LayerSize; ++r)
+		//		{
+		//			y_j += inputDerivation[k][r] * m_PrimeOutputs[k][r] * m_Weights[r][j];
+		//		}
+		//		inputNextLayer[k][j] = y_j;
+		//	}
+		//}
 
 		/*
 		* Update the weights and biases.
 		*/
 
 		const Matrix& y_i = p_PrevLayer->GetOutputs();
-		for (int k = 0; k < batchSize; ++k)
+		for (int i = 0; i < m_LayerSize; ++i)
 		{
-			for (int i = 0; i < m_LayerSize; ++i)
+			for (int j = 0; j < nextLayerSize; ++j)
 			{
-				for (int j = 0; j < nextLayerSize; ++j)
+				double weigthDer = 0.0;
+				for (int k = 0; k < batchSize; ++k)
 				{
-					m_Weights[i][j] -= m_LearningRate * inputDerivation[k][i] * m_PrimeOutputs[k][i] * y_i[k][j];
+					weigthDer += inputDerivation[k][i] * m_PrimeOutputs[k][i] * y_i[k][j] + m_Momentum[i][j] * m_MomentumAlpha;
 				}
+				weigthDer /= batchSize;
+				m_Weights[i][j] -= m_LearningRate * weigthDer;
+				m_Momentum[i][j] = -weigthDer;
 			}
 		}
 
-		for (int k = 0; k < batchSize; ++k)
+		for (int i = 0; i < m_LayerSize; ++i)
 		{
-			for (int i = 0; i < m_LayerSize; ++i)
+			double biasDer = 0.0;
+			for (int k = 0; k < batchSize; ++k)
 			{
-				m_Bias[i] -= m_LearningRate * inputDerivation[k][i] * m_PrimeOutputs[k][i];
+				biasDer += inputDerivation[k][i] * m_PrimeOutputs[k][i]; //# THIS WAS BUG ? * m_PrimeOutputs[k][i]
 			}
+			biasDer /= batchSize;
+			m_Bias[i] -= m_LearningRate * biasDer;
 		}
 
 		p_PrevLayer->Backward(inputNextLayer);
@@ -223,11 +268,13 @@ public:
 	// We do not want to copy the data, Layer class will never outlive the data
 	Matrix& SetOutput() { return m_Outputs; }
 
-	inline size_t GetLayerSize() { return m_LayerSize; }
+	size_t GetLayerSize() { return m_LayerSize; }
 
-	inline size_t GetInputSize() { return m_InputSize; }
+	size_t GetInputSize() { return m_InputSize; }
 
-	inline const Matrix& GetWeights() { return m_Weights; }
+	const Matrix& GetWeights() { return m_Weights; }
+
+	void SetLearningRate(double lr) { m_LearningRate = lr; }
 
 private:
 	
@@ -238,7 +285,7 @@ private:
 
 		// Set the mean and standard deviation for the normal distribution
 		double mean = 0.0;
-		double stddev = 0.001;
+		double stddev = 0.01;
 		//std::normal_distribution<double> distribution(mean, stddev);
 		std::normal_distribution<double> distribution(0.0f, std::sqrt(2.0 / (m_LayerSize + m_InputSize)));
 
@@ -267,8 +314,8 @@ private:
 	Matrix m_PrimeOutputs{};
 	Matrix m_Momentum{};
 	// Backpropagation and learning
-	double m_LearningRate = 0.0001;
-	double m_MomentumAlpha = 0.1;
+	double m_LearningRate = 0.001;
+	double m_MomentumAlpha = 0.9;
 	//
 	Layer* p_NextLayer = nullptr;
 	Layer* p_PrevLayer = nullptr;

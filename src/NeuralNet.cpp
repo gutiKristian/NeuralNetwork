@@ -68,3 +68,12 @@ void NeuralNet::Eval(const std::vector< std::vector<double> >& input, const std:
 	std::cout << "Accuracy: " << ((static_cast<double>(hit) / trueValues.size()) * 100) << "%\n";
 }
 
+void NeuralNet::AdjustLr(double lr)
+{
+	m_InputLayer.SetLearningRate(lr);
+	for (auto& l : m_Layers)
+	{
+		l.SetLearningRate(lr);
+	}
+}
+
