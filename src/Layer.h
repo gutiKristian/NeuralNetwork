@@ -128,8 +128,8 @@ public:
 				}
 
 				weigthDer /= batchSize;
-				m_Weights[i][j] -= m_LearningRate * weigthDer + m_Momentum[i][j];
-				m_Momentum[i][j] = -m_LearningRate * weigthDer;
+				m_Weights[i][j] -= m_LearningRate * weigthDer + m_Momentum[i][j] * m_MomentumAlpha;
+				m_Momentum[i][j] = -weigthDer;
 			}
 		}
 
@@ -226,8 +226,8 @@ public:
 					weigthDer += inputDerivation[k][i] * m_PrimeOutputs[k][i] * y_i[k][j];
 				}
 				weigthDer /= batchSize;
-				m_Weights[i][j] -= m_LearningRate * weigthDer + m_Momentum[i][j];
-				m_Momentum[i][j] = -m_LearningRate * weigthDer;
+				m_Weights[i][j] -= m_LearningRate * weigthDer + m_Momentum[i][j] * m_MomentumAlpha;
+				m_Momentum[i][j] = -weigthDer;
 			}
 		}
 
