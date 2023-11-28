@@ -11,9 +11,9 @@
 
 
 #define EPOCH_SIZE 20
-#define BATCH_SIZE 64
-#define TRAINING_SIZE 59'968 //59'904
-#define VALIDATION_SIZE 6400 //5888
+#define BATCH_SIZE 100
+#define TRAINING_SIZE 60'000 // 59'968 //59'904
+#define VALIDATION_SIZE 6000 //5888
 #define NORMALIZE_DATA 0
 
 /*
@@ -185,18 +185,18 @@ int main()
 	// Net and training
 
 	NeuralNet net({
-	Layer(784, 128, ReLu, ReLuPrime),
-	Layer(128, 10, Softmax, DoNothing)
+	Layer(784, 256, ReLu, ReLuPrime),
+	Layer(256, 10, Softmax, DoNothing)
 		}, BATCH_SIZE);
 
 	for (int epoch = 0; epoch < EPOCH_SIZE; ++epoch)
 	{
 		std::cout << "Epoch " << epoch+1 << "\n";
 
-		if (epoch > 8)
+		/*if (epoch > 8)
 		{
 			net.AdjustLr(0.001);
-		}
+		}*/
 		
 		// Training
 		for (int j = 0; j < trainData.size() - VALIDATION_SIZE - BATCH_SIZE; j += BATCH_SIZE)
