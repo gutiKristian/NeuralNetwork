@@ -129,7 +129,7 @@ public:
 
 				weigthDer /= batchSize;
 				m_Weights[i][j] -= m_LearningRate * weigthDer;
-				m_Momentum[i][j] = -weigthDer;
+				m_Momentum[i][j] = - weigthDer * m_LearningRate;
 			}
 		}
 
@@ -187,6 +187,11 @@ public:
 		auto nextLayerSize = p_PrevLayer->GetLayerSize();
 
 
+		for (int k = 0; k < batchSize; ++k)
+		{
+			m_ActivationPrimeFunc(m_PrimeOutputs[k]);
+		}
+
 		/*
 		* UNCOMMENT IF WANT TO USE MORE THAN ONE HIDDEN LAYER
 		* Compute gradients y_j based on the gradients computed above (that were passed here).
@@ -223,12 +228,11 @@ public:
 				double weigthDer = 0.0;
 				for (int k = 0; k < batchSize; ++k)
 				{
-					m_ActivationPrimeFunc(m_PrimeOutputs[k]);
 					weigthDer += inputDerivation[k][i] * m_PrimeOutputs[k][i] * y_i[k][j] + m_Momentum[i][j] * m_MomentumAlpha;
 				}
 				weigthDer /= batchSize;
 				m_Weights[i][j] -= m_LearningRate * weigthDer;
-				m_Momentum[i][j] = -weigthDer;
+				m_Momentum[i][j] = -weigthDer * m_LearningRate;
 			}
 		}
 
@@ -315,7 +319,7 @@ private:
 	Matrix m_PrimeOutputs{};
 	Matrix m_Momentum{};
 	// Backpropagation and learning
-	double m_LearningRate = 0.001;
+	double m_LearningRate = 0.01;
 	double m_MomentumAlpha = 0.9;
 	//
 	Layer* p_NextLayer = nullptr;

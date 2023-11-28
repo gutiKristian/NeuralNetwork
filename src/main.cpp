@@ -10,8 +10,8 @@
 #include <sstream>
 
 
-#define EPOCH_SIZE 100
-#define BATCH_SIZE 16
+#define EPOCH_SIZE 20
+#define BATCH_SIZE 32
 #define TRAINING_SIZE 60'000
 #define VALIDATION_SIZE 6000
 
@@ -84,7 +84,7 @@ void LoadMnistData(std::vector< std::vector<double>>& data, std::string name)
 
 		while (std::getline(ss, cell, ','))
 		{
-			row.push_back(std::stod(cell));
+			row.push_back(std::stod(cell) / 255.0);
 		}
 
 		data.push_back(row);
@@ -141,21 +141,21 @@ int main()
 	LoadMnistData(trainData, "fashion_mnist_train_vectors.csv");
 	LoadMnistDataLabels(trainLabels, "fashion_mnist_train_labels.csv");
 
-	NormalizeData(trainData);
+	//NormalizeData(trainData);
 
 
 	NeuralNet net({
-	Layer(784, 64, ReLu, ReLuPrime),
-	Layer(64, 10, Softmax, DoNothing)
+	Layer(784, 128, ReLu, ReLuPrime),
+	Layer(128, 10, Softmax, DoNothing)
 		}, BATCH_SIZE);
 
 	for (int epoch = 0; epoch < EPOCH_SIZE; ++epoch)
 	{
 		std::cout << "Epoch " << epoch+1 << "\n";
 
-		if (epoch > 5)
+		if (epoch > 10)
 		{
-			net.AdjustLr(0.0001);
+			net.AdjustLr(0.001);
 		}
 		
 		for (int j = 0; j < trainData.size(); j += BATCH_SIZE)
@@ -164,6 +164,11 @@ int main()
 			std::vector <std::vector<int>> trainingLabels{};
 			for (int i = 0; i < BATCH_SIZE; ++i)
 			{
+				/*if (i + j >= trainData.size())
+				{
+					continue;
+				}*/
+
 				trainingData.push_back(trainData[i + j]);
 				trainingLabels.push_back({ trainLabels[i + j] });
 			}
