@@ -314,8 +314,8 @@ private:
 	Matrix m_PrimeOutputs{};
 	Matrix m_Momentum{};
 	// Backpropagation and learning
-	double m_LearningRate = 0.0001;
-	double m_MomentumAlpha = 0.01;
+	double m_LearningRate = 0.001;
+	double m_MomentumAlpha = 0.9;
 	//
 	Layer* p_NextLayer = nullptr;
 	Layer* p_PrevLayer = nullptr;
