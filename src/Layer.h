@@ -223,6 +223,7 @@ public:
 				double weigthDer = 0.0;
 				for (int k = 0; k < batchSize; ++k)
 				{
+					m_ActivationPrimeFunc(m_PrimeOutputs[k]);
 					weigthDer += inputDerivation[k][i] * m_PrimeOutputs[k][i] * y_i[k][j] + m_Momentum[i][j] * m_MomentumAlpha;
 				}
 				weigthDer /= batchSize;
