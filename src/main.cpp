@@ -11,9 +11,9 @@
 
 
 #define EPOCH_SIZE 20
-#define BATCH_SIZE 32
-#define TRAINING_SIZE 60'000 // 59'968 //59'904
-#define VALIDATION_SIZE 6000 // 6400 //5888
+#define BATCH_SIZE 64
+#define TRAINING_SIZE 59'968 //59'904
+#define VALIDATION_SIZE 6400 //5888
 #define NORMALIZE_DATA 0
 
 /*
@@ -131,18 +131,20 @@ void LoadMnistDataLabels(std::vector<int>& labels, std::string name)
 	std::cout << "Done\n";
 }
 
+
+void ShuffleIndices(std::vector<int>& v)
+{
+	std::random_device rd;
+	std::mt19937 g(rd());
+	std::shuffle(v.begin(), v.end(), g);
+}
+
 // Returns indices vector, with this indices batches are created -- [0, 25, 1, ...] -> Batch [ [input[0], input[25], input[1]], [...] ] 
-std::vector<int> SGDGenerate(size_t size)
+std::vector<int> SGDInit(size_t size)
 {
 	std::vector<int> vec(size);
 	std::iota(vec.begin(), vec.end(), 0);
-
-
-	std::random_device rd;
-	std::mt19937 g(rd());
-
-	std::shuffle(vec.begin(), vec.end(), g);
-
+	ShuffleIndices(vec);
 	return vec;
 }
 
@@ -163,55 +165,68 @@ int main()
 		NormalizeData(trainData);
 	}
 
-	std::vector<int> batchIndices = SGDGenerate(trainData.size());
+	std::vector<int> sgdTrain = SGDInit(trainData.size());
+	std::vector<int> sgdValidate;
+
+	for (int i = TRAINING_SIZE - 1; i >= TRAINING_SIZE - VALIDATION_SIZE; --i)
+	{
+		sgdValidate.push_back(sgdTrain[i]);
+		sgdTrain.pop_back();
+	}
 
 	// Checks
-	assert(batchIndices.size() == trainData.size() && trainData.size() == trainLabels.size() && "Incorrect dims");
+	assert(sgdTrain.size() + sgdValidate.size() == TRAINING_SIZE);
+	assert(trainData.size() == trainLabels.size() && "Incorrect dims");
 	if (trainData.size() % BATCH_SIZE != 0)
 	{
 		throw std::exception("Batches cannot be created!\n");
 	}
 
-
-
+	// Net and training
 
 	NeuralNet net({
-	Layer(784, 256, ReLu, ReLuPrime),
-	Layer(256, 10, Softmax, DoNothing)
+	Layer(784, 128, ReLu, ReLuPrime),
+	Layer(128, 10, Softmax, DoNothing)
 		}, BATCH_SIZE);
 
 	for (int epoch = 0; epoch < EPOCH_SIZE; ++epoch)
 	{
 		std::cout << "Epoch " << epoch+1 << "\n";
 
-		/*if (epoch > 8)
+		if (epoch > 8)
 		{
 			net.AdjustLr(0.001);
-		}*/
+		}
 		
-		for (int j = 0; j < trainData.size(); j += BATCH_SIZE)
+		// Training
+		for (int j = 0; j < trainData.size() - VALIDATION_SIZE - BATCH_SIZE; j += BATCH_SIZE)
 		{
+			// Prepare batch
 			std::vector<std::vector<double>> trainingData{};
 			std::vector <std::vector<int>> trainingLabels{};
 			for (int i = 0; i < BATCH_SIZE; ++i)
 			{
-				trainingData.push_back(trainData[i + j]);
-				trainingLabels.push_back({ trainLabels[i + j] });
+				trainingData.push_back(trainData[sgdTrain[i + j]]);
+				trainingLabels.push_back({ trainLabels[sgdTrain[i + j]] });
 			}
 
 			net.Train(trainingData, trainingLabels);
 		}
 
+		// Validation
 		std::vector<std::vector<double>> trainingData{};
 		std::vector<int> trainingLabels{};
-		for (int i = trainData.size() - VALIDATION_SIZE; i < trainData.size(); ++i)
+		for (int i = 0; i < sgdValidate.size(); ++i)
 		{
-			trainingData.push_back(trainData[i]);
-			trainingLabels.push_back(trainLabels[i]);
+			trainingData.push_back(trainData[sgdValidate[i]]);
+			trainingLabels.push_back(trainLabels[sgdValidate[i]]);
 		}
-		net.Eval(trainingData, trainingLabels);
 
+		net.Eval(trainingData, trainingLabels);
+		ShuffleIndices(sgdTrain);
 	}
+
+	// Test data
 
 	std::cout << "Done!\n";
 	return 0;
