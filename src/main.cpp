@@ -12,8 +12,8 @@
 
 #define EPOCH_SIZE 100
 #define BATCH_SIZE 16
-#define TRAINING_SIZE 20'000
-#define VALIDATION_SIZE 2000
+#define TRAINING_SIZE 60'000
+#define VALIDATION_SIZE 6000
 
 
 /*
@@ -152,6 +152,11 @@ int main()
 	for (int epoch = 0; epoch < EPOCH_SIZE; ++epoch)
 	{
 		std::cout << "Epoch " << epoch+1 << "\n";
+
+		if (epoch > 2)
+		{
+			net.AdjustLr(0.0001);
+		}
 		
 		for (int j = 0; j < trainData.size(); j += BATCH_SIZE)
 		{

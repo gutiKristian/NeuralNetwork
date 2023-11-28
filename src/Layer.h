@@ -128,7 +128,8 @@ public:
 				}
 
 				weigthDer /= batchSize;
-				m_Weights[i][j] -= m_LearningRate * weigthDer;
+				m_Weights[i][j] -= m_LearningRate * weigthDer + m_Momentum[i][j];
+				m_Momentum[i][j] = -m_LearningRate * weigthDer;
 			}
 		}
 
@@ -224,8 +225,9 @@ public:
 				{
 					weigthDer += inputDerivation[k][i] * m_PrimeOutputs[k][i] * y_i[k][j];
 				}
-				weigthDer /= batchSize; 
-				m_Weights[i][j] -= m_LearningRate * weigthDer;
+				weigthDer /= batchSize;
+				m_Weights[i][j] -= m_LearningRate * weigthDer + m_Momentum[i][j];
+				m_Momentum[i][j] = -m_LearningRate * weigthDer;
 			}
 		}
 
@@ -266,11 +268,13 @@ public:
 	// We do not want to copy the data, Layer class will never outlive the data
 	Matrix& SetOutput() { return m_Outputs; }
 
-	inline size_t GetLayerSize() { return m_LayerSize; }
+	size_t GetLayerSize() { return m_LayerSize; }
 
-	inline size_t GetInputSize() { return m_InputSize; }
+	size_t GetInputSize() { return m_InputSize; }
 
-	inline const Matrix& GetWeights() { return m_Weights; }
+	const Matrix& GetWeights() { return m_Weights; }
+
+	void SetLearningRate(double lr) { m_LearningRate = lr; }
 
 private:
 	
@@ -281,7 +285,7 @@ private:
 
 		// Set the mean and standard deviation for the normal distribution
 		double mean = 0.0;
-		double stddev = 0.0001;
+		double stddev = 0.01;
 		//std::normal_distribution<double> distribution(mean, stddev);
 		std::normal_distribution<double> distribution(0.0f, std::sqrt(2.0 / (m_LayerSize + m_InputSize)));
 

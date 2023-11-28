@@ -11,6 +11,8 @@ public:
 
 	void Eval(const std::vector< std::vector<double> >& input, const std::vector<int>& trueValues);
 
+	void AdjustLr(double lr);
+
 private:
 	std::vector<double> m_Gradient;
 	std::vector<Layer> m_Layers;
