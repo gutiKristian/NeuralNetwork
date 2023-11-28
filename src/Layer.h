@@ -127,7 +127,7 @@ public:
 					weigthDer += gradients[k][i] * y_i[k][j];
 				}
 
-				// weightDer /= batchSize; ?
+				weigthDer /= batchSize;
 				m_Weights[i][j] -= m_LearningRate * weigthDer;
 			}
 		}
@@ -140,7 +140,7 @@ public:
 			{
 				biasDer += gradients[k][i];
 			}
-			//biasDer /= batchSize;
+			biasDer /= batchSize;
 			m_Bias[i] -= m_LearningRate * biasDer;
 		}
 
@@ -224,7 +224,7 @@ public:
 				{
 					weigthDer += inputDerivation[k][i] * m_PrimeOutputs[k][i] * y_i[k][j];
 				}
-				//weigthDer /= batchSize; 
+				weigthDer /= batchSize; 
 				m_Weights[i][j] -= m_LearningRate * weigthDer;
 			}
 		}
@@ -234,9 +234,9 @@ public:
 			double biasDer = 0.0;
 			for (int k = 0; k < batchSize; ++k)
 			{
-				biasDer += inputDerivation[k][i]; //# THIS WAS BUG ? * m_PrimeOutputs[k][i]
+				biasDer += inputDerivation[k][i] * m_PrimeOutputs[k][i]; //# THIS WAS BUG ? * m_PrimeOutputs[k][i]
 			}
-			//biasDer /= batchSize;
+			biasDer /= batchSize;
 			m_Bias[i] -= m_LearningRate * biasDer;
 		}
 
@@ -310,7 +310,7 @@ private:
 	Matrix m_PrimeOutputs{};
 	Matrix m_Momentum{};
 	// Backpropagation and learning
-	double m_LearningRate = 0.0001;
+	double m_LearningRate = 0.001;
 	double m_MomentumAlpha = 0.1;
 	//
 	Layer* p_NextLayer = nullptr;

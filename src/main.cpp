@@ -10,7 +10,7 @@
 #include <sstream>
 
 
-#define EPOCH_SIZE 10
+#define EPOCH_SIZE 100
 #define BATCH_SIZE 16
 #define TRAINING_SIZE 20'000
 #define VALIDATION_SIZE 2000
@@ -145,8 +145,8 @@ int main()
 
 
 	NeuralNet net({
-	Layer(784, 256, ReLu, ReLuPrime),
-	Layer(256, 10, Softmax, DoNothing)
+	Layer(784, 64, ReLu, ReLuPrime),
+	Layer(64, 10, Softmax, DoNothing)
 		}, BATCH_SIZE);
 
 	for (int epoch = 0; epoch < EPOCH_SIZE; ++epoch)
