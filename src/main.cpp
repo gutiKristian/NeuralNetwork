@@ -12,9 +12,9 @@
 
 #define EPOCH_SIZE 20
 #define BATCH_SIZE 32
-#define TRAINING_SIZE 60'000
-#define VALIDATION_SIZE 6000
-
+#define TRAINING_SIZE 60'000 // 59'968 //59'904
+#define VALIDATION_SIZE 6000 // 6400 //5888
+#define NORMALIZE_DATA 0
 
 /*
 * Normalizes data and then scales them into [0, 1] interval.
@@ -84,7 +84,9 @@ void LoadMnistData(std::vector< std::vector<double>>& data, std::string name)
 
 		while (std::getline(ss, cell, ','))
 		{
-			row.push_back(std::stod(cell) / 255.0);
+			double value = std::stod(cell);
+			// Data has to be at least scaled to [0.0, 1.0]
+			row.push_back(NORMALIZE_DATA ? value : value / 255.0);
 		}
 
 		data.push_back(row);
@@ -129,6 +131,20 @@ void LoadMnistDataLabels(std::vector<int>& labels, std::string name)
 	std::cout << "Done\n";
 }
 
+// Returns indices vector, with this indices batches are created -- [0, 25, 1, ...] -> Batch [ [input[0], input[25], input[1]], [...] ] 
+std::vector<int> SGDGenerate(size_t size)
+{
+	std::vector<int> vec(size);
+	std::iota(vec.begin(), vec.end(), 0);
+
+
+	std::random_device rd;
+	std::mt19937 g(rd());
+
+	std::shuffle(vec.begin(), vec.end(), g);
+
+	return vec;
+}
 
 int main()
 {
@@ -138,25 +154,40 @@ int main()
 	std::vector< std::vector<double> > trainData;
 	std::vector<int> trainLabels;
 
+	// Data
 	LoadMnistData(trainData, "fashion_mnist_train_vectors.csv");
 	LoadMnistDataLabels(trainLabels, "fashion_mnist_train_labels.csv");
 
-	//NormalizeData(trainData);
+	if (NORMALIZE_DATA)
+	{
+		NormalizeData(trainData);
+	}
+
+	std::vector<int> batchIndices = SGDGenerate(trainData.size());
+
+	// Checks
+	assert(batchIndices.size() == trainData.size() && trainData.size() == trainLabels.size() && "Incorrect dims");
+	if (trainData.size() % BATCH_SIZE != 0)
+	{
+		throw std::exception("Batches cannot be created!\n");
+	}
+
+
 
 
 	NeuralNet net({
-	Layer(784, 128, ReLu, ReLuPrime),
-	Layer(128, 10, Softmax, DoNothing)
+	Layer(784, 256, ReLu, ReLuPrime),
+	Layer(256, 10, Softmax, DoNothing)
 		}, BATCH_SIZE);
 
 	for (int epoch = 0; epoch < EPOCH_SIZE; ++epoch)
 	{
 		std::cout << "Epoch " << epoch+1 << "\n";
 
-		if (epoch > 10)
+		/*if (epoch > 8)
 		{
 			net.AdjustLr(0.001);
-		}
+		}*/
 		
 		for (int j = 0; j < trainData.size(); j += BATCH_SIZE)
 		{
@@ -164,11 +195,6 @@ int main()
 			std::vector <std::vector<int>> trainingLabels{};
 			for (int i = 0; i < BATCH_SIZE; ++i)
 			{
-				/*if (i + j >= trainData.size())
-				{
-					continue;
-				}*/
-
 				trainingData.push_back(trainData[i + j]);
 				trainingLabels.push_back({ trainLabels[i + j] });
 			}
