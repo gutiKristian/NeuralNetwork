@@ -153,7 +153,7 @@ int main()
 	{
 		std::cout << "Epoch " << epoch+1 << "\n";
 
-		if (epoch > 2)
+		if (epoch > 10)
 		{
 			net.AdjustLr(0.0001);
 		}

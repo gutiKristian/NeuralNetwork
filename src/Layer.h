@@ -124,11 +124,11 @@ public:
 				// E = sum(Ek)
 				for (int k = 0; k < batchSize; ++k)
 				{
-					weigthDer += gradients[k][i] * y_i[k][j];
+					weigthDer += gradients[k][i] * y_i[k][j] + m_Momentum[i][j] * m_MomentumAlpha;
 				}
 
 				weigthDer /= batchSize;
-				m_Weights[i][j] -= m_LearningRate * weigthDer + m_Momentum[i][j] * m_MomentumAlpha;
+				m_Weights[i][j] -= m_LearningRate * weigthDer;
 				m_Momentum[i][j] = -weigthDer;
 			}
 		}
@@ -223,10 +223,10 @@ public:
 				double weigthDer = 0.0;
 				for (int k = 0; k < batchSize; ++k)
 				{
-					weigthDer += inputDerivation[k][i] * m_PrimeOutputs[k][i] * y_i[k][j];
+					weigthDer += inputDerivation[k][i] * m_PrimeOutputs[k][i] * y_i[k][j] + m_Momentum[i][j] * m_MomentumAlpha;
 				}
 				weigthDer /= batchSize;
-				m_Weights[i][j] -= m_LearningRate * weigthDer + m_Momentum[i][j] * m_MomentumAlpha;
+				m_Weights[i][j] -= m_LearningRate * weigthDer;
 				m_Momentum[i][j] = -weigthDer;
 			}
 		}
@@ -314,8 +314,8 @@ private:
 	Matrix m_PrimeOutputs{};
 	Matrix m_Momentum{};
 	// Backpropagation and learning
-	double m_LearningRate = 0.001;
-	double m_MomentumAlpha = 0.1;
+	double m_LearningRate = 0.0001;
+	double m_MomentumAlpha = 0.01;
 	//
 	Layer* p_NextLayer = nullptr;
 	Layer* p_PrevLayer = nullptr;
