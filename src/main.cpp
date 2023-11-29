@@ -11,7 +11,7 @@
 
 
 #define EPOCH_SIZE 20
-#define BATCH_SIZE 100
+#define BATCH_SIZE 200
 #define TRAINING_SIZE 60'000 // 59'968 //59'904
 #define VALIDATION_SIZE 6000 //5888
 #define NORMALIZE_DATA 0
@@ -185,8 +185,9 @@ int main()
 	// Net and training
 
 	NeuralNet net({
-	Layer(784, 256, ReLu, ReLuPrime),
-	Layer(256, 10, Softmax, DoNothing)
+	Layer(784, 64, ReLu, ReLuPrime),
+	Layer(64, 64, ReLu, ReLuPrime),
+	Layer(64, 10, Softmax, DoNothing)
 		}, BATCH_SIZE);
 
 	for (int epoch = 0; epoch < EPOCH_SIZE; ++epoch)

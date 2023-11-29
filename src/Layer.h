@@ -7,6 +7,14 @@
 #include <random>
 #include <algorithm>
 
+/*
+* RMSProp optimization
+*/
+#define ETA 0.001
+#define DELTA 1e-8
+#define RO 0.9
+#define RMS_W_MOMENTUM 0
+
 class Layer
 {
 	using Matrix = std::vector<std::vector<double>>;
@@ -16,6 +24,7 @@ public:
 	{
 		m_Weights.resize(m_LayerSize, std::vector<double>(m_InputSize));
 		m_Momentum.resize(m_LayerSize, std::vector<double>(m_InputSize, 0.0));
+		m_RmsRates.resize(m_LayerSize, std::vector<double>(m_InputSize, 0.0));
 		m_Bias.resize(m_LayerSize, 0.0);
 		InitWeights();
 	};
@@ -125,10 +134,15 @@ public:
 				{
 					weigthDer += gradients[k][i] * y_i[k][j];
 				}
-
 				weigthDer /= batchSize;
-				m_Weights[i][j] += -m_LearningRate * weigthDer + m_Momentum[i][j] * m_MomentumAlpha;
-				m_Momentum[i][j] = -m_LearningRate * weigthDer + m_Momentum[i][j] * m_MomentumAlpha;
+
+				// calculate r_ij
+				m_RmsRates[i][j] = RO * m_RmsRates[i][j] + (1 - RO) * std::pow(weigthDer, 2);
+				// Update weights with rms prop
+				double deltaW = -(ETA / std::sqrt(m_RmsRates[i][j] + DELTA)) * weigthDer;
+
+				m_Weights[i][j] += deltaW + (RMS_W_MOMENTUM ? m_Momentum[i][j] * m_MomentumAlpha : 0.0);
+				m_Momentum[i][j] = deltaW;
 			}
 		}
 
@@ -319,6 +333,7 @@ private:
 	Matrix m_Outputs{};
 	Matrix m_PrimeOutputs{};
 	Matrix m_Momentum{};
+	Matrix m_RmsRates{};
 	// Backpropagation and learning
 	double m_LearningRate = 0.01;
 	double m_MomentumAlpha = 0.9;
