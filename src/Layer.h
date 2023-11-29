@@ -198,7 +198,7 @@ public:
 		
 		Matrix inputNextLayer; // can be preallocated
 		
-		/*inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
+		inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
 
 		for (int k = 0; k < batchSize; ++k)
 		{
@@ -211,7 +211,7 @@ public:
 				}
 				inputNextLayer[k][j] = y_j;
 			}
-		}*/
+		}
 
 		/*
 		* Update the weights and biases.

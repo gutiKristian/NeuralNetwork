@@ -193,11 +193,6 @@ int main()
 	{
 		std::cout << "Epoch " << epoch+1 << "\n";
 
-		/*if (epoch > 8)
-		{
-			net.AdjustLr(0.001);
-		}*/
-		
 		// Training
 		for (int j = 0; j < trainData.size() - VALIDATION_SIZE - BATCH_SIZE; j += BATCH_SIZE)
 		{
