@@ -10,7 +10,7 @@
 #include <sstream>
 
 
-#define EPOCH_SIZE 20
+#define EPOCH_SIZE 100
 #define BATCH_SIZE 100
 #define TRAINING_SIZE 60'000 // 59'968 //59'904
 #define VALIDATION_SIZE 6000 //5888
@@ -203,6 +203,7 @@ int main()
 
 	NeuralNet net({
 	Layer(784, 128, ReLu, ReLuPrime),
+	Layer(128, 128, ReLu, ReLuPrime),
 	Layer(128, 10, Softmax, DoNothing)
 		}, BATCH_SIZE);
 
@@ -213,8 +214,12 @@ int main()
 		/*if (epoch > 7)
 		{
 			net.AdjustLr(0.001);
-		}*/
-		
+		}
+		else if (epoch > 20)
+		{
+			net.AdjustLr(0.0001);
+		}
+		*/
 		// Training
 
 		// Validation
