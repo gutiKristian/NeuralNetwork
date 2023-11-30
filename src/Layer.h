@@ -105,7 +105,7 @@ public:
 		{
 			for (int i = 0; i < batchOutputSize; ++i)
 			{
-				gradients[k][i] = (i == trueValuesBatch[k][0] ? m_Outputs[k][i] - 1.0 : m_Outputs[k][i]);
+				gradients[k][i] = ((i == trueValuesBatch[k][0]) ? m_Outputs[k][i] - 1.0 : m_Outputs[k][i]);
 			}
 		}
 
@@ -121,15 +121,14 @@ public:
 			for (int j = 0; j < nextLayerSize; ++j)
 			{
 				double weigthDer = 0.0;
-				// E = sum(Ek)
 				for (int k = 0; k < batchSize; ++k)
 				{
-					weigthDer += gradients[k][i] * y_i[k][j] + m_Momentum[i][j] * m_MomentumAlpha;
+					weigthDer += gradients[k][i] * y_i[k][j];
 				}
 
 				weigthDer /= batchSize;
-				m_Weights[i][j] -= m_LearningRate * weigthDer;
-				m_Momentum[i][j] = - weigthDer * m_LearningRate;
+				m_Weights[i][j] += -m_LearningRate * weigthDer + m_Momentum[i][j] * m_MomentumAlpha;
+				m_Momentum[i][j] = -m_LearningRate * weigthDer + m_Momentum[i][j] * m_MomentumAlpha;
 			}
 		}
 
@@ -142,7 +141,7 @@ public:
 				biasDer += gradients[k][i];
 			}
 			biasDer /= batchSize;
-			m_Bias[i] -= m_LearningRate * biasDer;
+			m_Bias[i] += -m_LearningRate * biasDer;
 		}
 
 		/*
@@ -199,22 +198,20 @@ public:
 		
 		Matrix inputNextLayer; // can be preallocated
 		
-		//inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
+		/*inputNextLayer.resize(batchSize, std::vector<double>(nextLayerSize, 0.0));
 
-		//for (int k = 0; k < batchSize; ++k)
-		//{
-		//	m_ActivationPrimeFunc(m_PrimeOutputs[k]);
-
-		//	for (int j = 0; j < nextLayerSize; ++j)
-		//	{
-		//		double y_j = 0.0;
-		//		for (int r = 0; r < m_LayerSize; ++r)
-		//		{
-		//			y_j += inputDerivation[k][r] * m_PrimeOutputs[k][r] * m_Weights[r][j];
-		//		}
-		//		inputNextLayer[k][j] = y_j;
-		//	}
-		//}
+		for (int k = 0; k < batchSize; ++k)
+		{
+			for (int j = 0; j < nextLayerSize; ++j)
+			{
+				double y_j = 0.0;
+				for (int r = 0; r < m_LayerSize; ++r)
+				{
+					y_j += inputDerivation[k][r] * m_PrimeOutputs[k][r] * m_Weights[r][j];
+				}
+				inputNextLayer[k][j] = y_j;
+			}
+		}*/
 
 		/*
 		* Update the weights and biases.
@@ -228,11 +225,11 @@ public:
 				double weigthDer = 0.0;
 				for (int k = 0; k < batchSize; ++k)
 				{
-					weigthDer += inputDerivation[k][i] * m_PrimeOutputs[k][i] * y_i[k][j] + m_Momentum[i][j] * m_MomentumAlpha;
+					weigthDer += inputDerivation[k][i] * m_PrimeOutputs[k][i] * y_i[k][j];
 				}
 				weigthDer /= batchSize;
-				m_Weights[i][j] -= m_LearningRate * weigthDer;
-				m_Momentum[i][j] = -weigthDer * m_LearningRate;
+				m_Weights[i][j] += -m_LearningRate * weigthDer + m_Momentum[i][j] * m_MomentumAlpha;
+				m_Momentum[i][j] = -m_LearningRate * weigthDer + m_Momentum[i][j] * m_MomentumAlpha;
 			}
 		}
 
@@ -241,10 +238,10 @@ public:
 			double biasDer = 0.0;
 			for (int k = 0; k < batchSize; ++k)
 			{
-				biasDer += inputDerivation[k][i] * m_PrimeOutputs[k][i]; //# THIS WAS BUG ? * m_PrimeOutputs[k][i]
+				biasDer += inputDerivation[k][i] * m_PrimeOutputs[k][i];
 			}
 			biasDer /= batchSize;
-			m_Bias[i] -= m_LearningRate * biasDer;
+			m_Bias[i] += -m_LearningRate * biasDer;
 		}
 
 		p_PrevLayer->Backward(inputNextLayer);
