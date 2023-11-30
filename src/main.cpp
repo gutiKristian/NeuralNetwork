@@ -8,6 +8,7 @@
 #include <numeric>
 #include <algorithm>
 #include <sstream>
+#include <chrono>
 
 
 #define EPOCH_SIZE 100
@@ -160,6 +161,7 @@ int main()
 
 	std::cout << "Neural network project\n";
 
+	auto timeStart = std::chrono::high_resolution_clock::now();
 	
 	std::vector< std::vector<double> > trainData;
 	std::vector<int> trainLabels;
@@ -254,6 +256,12 @@ int main()
 		// Reshuffle
 		std::shuffle(indices.begin(), indices.end(), generator);
 		PrepareIndices(indices, sgdTrain, sgdValidate);
+
+		std::cout << "Epoch " << epoch + 1 << " done, time elapsed:\n";
+		auto timeEpochDone = std::chrono::high_resolution_clock::now();
+		auto timeDurationSeconds = std::chrono::duration_cast<std::chrono::seconds>(timeEpochDone - timeStart);
+		auto timeDurationMinutes = std::chrono::duration_cast<std::chrono::minutes>(timeDurationSeconds);
+		std::cout << timeDurationMinutes.count() << " minute(s), " << (timeDurationSeconds - timeDurationMinutes).count() << " seconds\n";
 	}
 
 	// Test data
