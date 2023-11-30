@@ -1,51 +1,84 @@
 #include "Activations.h"
 #include <cmath>
 
-double UnitStepFunction(double potential)
+void UnitStepFunction(std::vector<double>& potentials)
 {
-	return potential >= 0.0 ? 1.0 : 0.0;
+	auto size = potentials.size();
+	for (int i = 0; i < size; ++i)
+	{
+		potentials[i] = potentials[i] >= 0.0 ? 1.0 : 0.0;
+	}
 }
 
 // output layer
-double LogisticSigmoid(double potential)
+void LogisticSigmoid(std::vector<double>& potentials)
 {
+	auto size = potentials.size();
 	double steepness = 1.0;
-	return 1.0 / (1.0 + std::exp(-potential * steepness));
+	for (int i = 0; i < size; ++i)
+	{
+		potentials[i] = 1.0 / (1.0 + std::exp(-potentials[i] * steepness));
+	}
 }
 
-double LogisticSigmoidPrime(double potential)
+void LogisticSigmoidPrime(std::vector<double>& potentials)
 {
-	double l = LogisticSigmoid(potential);
-	return l * (1.0 - l);
+	auto size = potentials.size();
+	double steepness = 1.0;
+	for (int i = 0; i < size; ++i)
+	{
+		double l = 1.0 / (1.0 + std::exp(-potentials[i] * steepness));
+		potentials[i] = l * (1.0 - l);
+	}
 }
 
 // hidden layer
-double ReLu(double potential)
+void ReLu(std::vector<double>& potentials)
 {
-	return std::max(potential, 0.0);
+	auto size = potentials.size();
+	for (int i = 0; i < size; ++i)
+	{
+		potentials[i] = std::max(potentials[i], 0.0);
+	}
 }
 
-double ReLuPrime(double potential)
+void ReLuPrime(std::vector<double>& potentials)
 {
-	return potential > 0.0 ? 1.0 : 0.0;
+	auto size = potentials.size();
+	for (int i = 0; i < size; ++i)
+	{
+		potentials[i] = potentials[i] > 0.0 ? 1.0 : 0.0;
+	}
 }
 
-double Identity(double potential)
+void Identity(std::vector<double>& potentials)
 {
-	return potential;
 }
 
-double IdentityPrime(double potential)
+void IdentityPrime(std::vector<double>& potentials)
 {
-	return 1.0;
+	auto size = potentials.size();
+	for (int i = 0; i < size; ++i)
+	{
+		potentials[i] = 1.0;
+	}
 }
 
-double Tanh(double potential)
+void Softmax(std::vector<double>& potentials)
 {
-	return std::tanh(potential);
+	double _sum = 0.0;
+	for (auto& val : potentials)
+	{
+		val = std::exp(val);
+		_sum += val;
+	}
+
+	for (auto& val : potentials)
+	{
+		val /= _sum;
+	}
 }
 
-double TanhPrime(double potential)
+void DoNothing(std::vector<double>& potentials)
 {
-	return 1 - std::pow(std::tanh(potential), 2);
 }

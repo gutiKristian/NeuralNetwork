@@ -36,7 +36,7 @@ NeuralNet::NeuralNet(std::initializer_list<Layer> layers, int batchSize) : m_Lay
 
 }
 
-void NeuralNet::Train(const std::vector<std::vector<double>>& batchInputs, const std::vector<std::vector<double>>& batchOutputs)
+void NeuralNet::Train(const std::vector<std::vector<double>>& batchInputs, const std::vector<std::vector<int>>& batchOutputs)
 {
 	assert(m_Layers.size() > 0 && "No layers present!");
 
@@ -47,30 +47,33 @@ void NeuralNet::Train(const std::vector<std::vector<double>>& batchInputs, const
 
 	startLayer.Forward(batchInputs);
 
-	outputLayer.Backward(batchOutputs, false);
+	outputLayer.Backward(batchOutputs);
 
 }
 
-void NeuralNet::Eval(const std::vector< std::vector<double> >& input, const std::vector < std::vector<double> > & output)
+void NeuralNet::Eval(const std::vector< std::vector<double> >& input, const std::vector<int>& trueValues)
 {
 	auto& startLayer = m_Layers[0];
-	for (int i = 0; i < output.size(); ++i)
+	auto& lastLayer = m_Layers.back();
+	int hit = 0;
+	
+	for (int i = 0; i < input.size(); ++i)
 	{
 		startLayer.Forward({ input[i] });
-		std::cout << input[i][0] << " XOR " << input[i][1] << " is " << m_Layers.back().GetOutputs()[0][0] << "\n";
+		auto& output = lastLayer.GetOutputs();
+		int pred = std::distance(output[0].begin(), std::max_element(output[0].begin(), output[0].end()));
+		if (pred == trueValues[i]) ++hit;
 	}
+	std::cout << "Sample weight: " << lastLayer.GetWeights()[0][0] << "\n";
+	std::cout << "Accuracy: " << ((static_cast<double>(hit) / trueValues.size()) * 100) << "%\n";
 }
 
-
-double NeuralNet::ComputeError(const std::vector< std::vector<double> >& expectedOutputs)
+void NeuralNet::AdjustLr(double lr)
 {
-	const auto& netOutputs = m_Layers.back().GetOutputs();
-	double error = 0.0;
-	size_t size = netOutputs.size();
-	for (int i = 0; i < size; ++i)
+	m_InputLayer.SetLearningRate(lr);
+	for (auto& l : m_Layers)
 	{
-		error += std::pow(netOutputs[i][0] - expectedOutputs[i][0], 2) * 0.5;
+		l.SetLearningRate(lr);
 	}
-
-	return error;
 }
+

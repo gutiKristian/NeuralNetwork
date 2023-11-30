@@ -7,13 +7,12 @@ class NeuralNet
 public:
 	NeuralNet(std::initializer_list<Layer> layers, int batchSize = 1);
 public:
-	void Train(const std::vector<std::vector<double>>& batchInputs, const std::vector<std::vector<double>>& batchOutputs);
+	void Train(const std::vector<std::vector<double>>& batchInputs, const std::vector<std::vector<int>>& batchOutputs);
 
-	void Eval(const std::vector< std::vector<double> >& input, const std::vector < std::vector<double> >& output);
-	/*
-	* Computes error for one input
-	*/
-	double ComputeError(const std::vector< std::vector<double> >& expectedOutputs);
+	void Eval(const std::vector< std::vector<double> >& input, const std::vector<int>& trueValues);
+
+	void AdjustLr(double lr);
+
 private:
 	std::vector<double> m_Gradient;
 	std::vector<Layer> m_Layers;
