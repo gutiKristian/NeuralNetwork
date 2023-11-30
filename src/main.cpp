@@ -14,8 +14,8 @@
 #define EPOCH_SIZE 100
 #define BATCH_SIZE 100
 #define TRAINING_SIZE 60'000 // 59'968 //59'904
-#define VALIDATION_SIZE 6000 //5888
-#define NORMALIZE_DATA 1
+#define VALIDATION_SIZE 12000 //5888
+#define NORMALIZE_DATA 0
 
 /*
 * Normalizes data and then scales them into [0, 1] interval.
