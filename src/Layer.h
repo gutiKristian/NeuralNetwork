@@ -287,12 +287,17 @@ private:
 		std::random_device rd;
 		std::mt19937 gen(rd());
 
-		// Set the mean and standard deviation for the normal distribution
+		// Initialization 1
+
 		//double mean = 0.0;
 		//double stddev = 0.01;
 		//std::normal_distribution<double> distribution(mean, stddev);
-		
+
+		// Initialization 2
+
 		std::normal_distribution<double> distribution(0.0f, std::sqrt(2.0 / (m_LayerSize + m_InputSize)));
+
+		// Initialization 3
 
 		// std::normal_distribution<double> distribution(0.0f, 2.0 / (m_LayerSize + m_InputSize));
 
