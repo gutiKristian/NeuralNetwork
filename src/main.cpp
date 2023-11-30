@@ -15,7 +15,7 @@
 #define BATCH_SIZE 100
 #define TRAINING_SIZE 60'000 // 59'968 //59'904
 #define VALIDATION_SIZE 6000 //5888
-#define NORMALIZE_DATA 0
+#define NORMALIZE_DATA 1
 
 /*
 * Normalizes data and then scales them into [0, 1] interval.
@@ -168,17 +168,24 @@ int main()
 
 	// Data
 	LoadMnistData(trainData, "fashion_mnist_train_vectors.csv");
-	LoadMnistDataLabels(trainLabels, "fashion_mnist_train_labels.csv");
+	LoadMnistDataLabels(trainLabels, "fashion_mnist_train_labels.csv"); 
+
+	std::vector< std::vector<double> > testData;
+	std::vector<int> testLabels;
+
+	LoadMnistData(testData, "fashion_mnist_test_vectors.csv");
+	LoadMnistDataLabels(testLabels, "fashion_mnist_test_labels.csv");
 
 	assert(trainData.size() == TRAINING_SIZE);
 	assert(trainLabels.size() == TRAINING_SIZE);
 
-
 	if (NORMALIZE_DATA)
 	{
 		NormalizeData(trainData);
+		NormalizeData(testData);
 	}
 
+	std::cout << "Data loaded after: " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - timeStart) << " seconds\n";
 	//////////////////////////////////////////////////////////////////////////
 	// 
 	//						PREPARE INDICES
@@ -209,9 +216,10 @@ int main()
 	Layer(128, 10, Softmax, DoNothing)
 		}, BATCH_SIZE);
 
+	std::cout << "\n\n";
 	for (int epoch = 0; epoch < EPOCH_SIZE; ++epoch)
 	{
-		std::cout << "Epoch " << epoch+1 << "\n";
+		std::cout << "\t\tEpoch " << epoch+1 << "\n";
 
 		/*if (epoch > 7)
 		{
@@ -251,7 +259,13 @@ int main()
 			net.Train(trainingData, trainingLabels);
 		}
 
-		net.Eval(validationData, validationLabels);
+		double acc = net.Eval(validationData, validationLabels);
+
+		if (acc > 88.00)
+		{
+			std::cout << "Evaluating test data...\n";
+			net.Eval(testData, testLabels);
+		}
 
 		// Reshuffle
 		std::shuffle(indices.begin(), indices.end(), generator);
@@ -262,9 +276,12 @@ int main()
 		auto timeDurationSeconds = std::chrono::duration_cast<std::chrono::seconds>(timeEpochDone - timeStart);
 		auto timeDurationMinutes = std::chrono::duration_cast<std::chrono::minutes>(timeDurationSeconds);
 		std::cout << timeDurationMinutes.count() << " minute(s), " << (timeDurationSeconds - timeDurationMinutes).count() << " seconds\n";
+		std::cout << "\n";
 	}
 
 	// Test data
+	std::cout << "Evaluating test data...\n";
+	net.Eval(testData, testLabels);
 
 	std::cout << "Done!\n";
 	return 0;
