@@ -131,25 +131,33 @@ void LoadMnistDataLabels(std::vector<int>& labels, std::string name)
 	std::cout << "Done\n";
 }
 
-
-void ShuffleIndices(std::vector<int>& v)
+/*
+* Fills arrays with indices. tI - training indices, vI - validation Indices
+*/
+void PrepareIndices(const std::vector<int>& shuffledIndices, std::vector<int>& tI, std::vector<int>& vI)
 {
-	std::random_device rd;
-	std::mt19937 g(rd());
-	std::shuffle(v.begin(), v.end(), g);
-}
+	assert(tI.size() + vI.size() == TRAINING_SIZE);
 
-// Returns indices vector, with this indices batches are created -- [0, 25, 1, ...] -> Batch [ [input[0], input[25], input[1]], [...] ] 
-std::vector<int> SGDInit(size_t size)
-{
-	std::vector<int> vec(size);
-	std::iota(vec.begin(), vec.end(), 0);
-	ShuffleIndices(vec);
-	return vec;
+	// Fill in validation
+	for (size_t i = 0; i < VALIDATION_SIZE; ++i)
+	{
+		vI[i] = shuffledIndices[i];
+	}
+
+	// Fill in training
+	for (size_t i = VALIDATION_SIZE; i < TRAINING_SIZE; ++i)
+	{
+		tI[i - VALIDATION_SIZE] = shuffledIndices[i];
+	}
+
 }
 
 int main()
 {
+
+	static_assert(((TRAINING_SIZE - VALIDATION_SIZE) % BATCH_SIZE == 0) && "Batches cannot be created!\n");
+
+
 	std::cout << "Neural network project\n";
 
 	
@@ -160,46 +168,69 @@ int main()
 	LoadMnistData(trainData, "fashion_mnist_train_vectors.csv");
 	LoadMnistDataLabels(trainLabels, "fashion_mnist_train_labels.csv");
 
+	assert(trainData.size() == TRAINING_SIZE);
+	assert(trainLabels.size() == TRAINING_SIZE);
+
+
 	if (NORMALIZE_DATA)
 	{
 		NormalizeData(trainData);
 	}
 
-	std::vector<int> sgdTrain = SGDInit(trainData.size());
+	//////////////////////////////////////////////////////////////////////////
+	// 
+	//						PREPARE INDICES
+
+	std::random_device rd;
+	std::mt19937 generator(rd());
+
+	// Fill with [0,1,2,...,trainData.size()]
+	std::vector<int> indices(trainData.size());
+	std::iota(indices.begin(), indices.end(), 0);
+
+	std::shuffle(indices.begin(), indices.end(), generator);
+
+
+	std::vector<int> sgdTrain;
+	sgdTrain.resize(TRAINING_SIZE - VALIDATION_SIZE, 0);
 	std::vector<int> sgdValidate;
+	sgdValidate.resize(VALIDATION_SIZE, 0);
 
-	for (int i = TRAINING_SIZE - 1; i >= TRAINING_SIZE - VALIDATION_SIZE; --i)
-	{
-		sgdValidate.push_back(sgdTrain[i]);
-		sgdTrain.pop_back();
-	}
+	PrepareIndices(indices, sgdTrain, sgdValidate);
 
-	// Checks
-	assert(sgdTrain.size() + sgdValidate.size() == TRAINING_SIZE);
-	assert(trainData.size() == trainLabels.size() && "Incorrect dims");
-	if (trainData.size() % BATCH_SIZE != 0)
-	{
-		throw std::exception("Batches cannot be created!\n");
-	}
-
-	// Net and training
+	//////////////////////////////////////////////////////////////////////////
+	//						NET TRAINING
 
 	NeuralNet net({
-	Layer(784, 256, ReLu, ReLuPrime),
-	Layer(256, 10, Softmax, DoNothing)
+	Layer(784, 128, ReLu, ReLuPrime),
+	Layer(128, 10, Softmax, DoNothing)
 		}, BATCH_SIZE);
 
 	for (int epoch = 0; epoch < EPOCH_SIZE; ++epoch)
 	{
 		std::cout << "Epoch " << epoch+1 << "\n";
 
-		/*if (epoch > 8)
+		/*if (epoch > 7)
 		{
 			net.AdjustLr(0.001);
 		}*/
 		
 		// Training
-		for (int j = 0; j < trainData.size() - VALIDATION_SIZE - BATCH_SIZE; j += BATCH_SIZE)
+
+		// Validation
+		std::vector<std::vector<double>> validationData{};
+		std::vector<int> validationLabels{};
+		for (size_t i = 0; i < VALIDATION_SIZE; ++i)
+		{
+			validationData.push_back(trainData[sgdValidate[i]]);
+			validationLabels.push_back(trainLabels[sgdValidate[i]]);
+		}
+
+
+		constexpr int SGD_TRAIN_SIZE = TRAINING_SIZE - VALIDATION_SIZE;
+
+		// Batches
+		for (int j = 0; j < SGD_TRAIN_SIZE - BATCH_SIZE; j += BATCH_SIZE)
 		{
 			// Prepare batch
 			std::vector<std::vector<double>> trainingData{};
@@ -213,17 +244,11 @@ int main()
 			net.Train(trainingData, trainingLabels);
 		}
 
-		// Validation
-		std::vector<std::vector<double>> trainingData{};
-		std::vector<int> trainingLabels{};
-		for (int i = 0; i < sgdValidate.size(); ++i)
-		{
-			trainingData.push_back(trainData[sgdValidate[i]]);
-			trainingLabels.push_back(trainLabels[sgdValidate[i]]);
-		}
+		net.Eval(validationData, validationLabels);
 
-		net.Eval(trainingData, trainingLabels);
-		ShuffleIndices(sgdTrain);
+		// Reshuffle
+		std::shuffle(indices.begin(), indices.end(), generator);
+		PrepareIndices(indices, sgdTrain, sgdValidate);
 	}
 
 	// Test data
