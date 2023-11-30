@@ -9,7 +9,7 @@ public:
 public:
 	void Train(const std::vector<std::vector<double>>& batchInputs, const std::vector<std::vector<int>>& batchOutputs);
 
-	void Eval(const std::vector< std::vector<double> >& input, const std::vector<int>& trueValues);
+	double Eval(const std::vector< std::vector<double> >& input, const std::vector<int>& trueValues);
 
 	void AdjustLr(double lr);
 

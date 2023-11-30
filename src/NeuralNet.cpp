@@ -51,7 +51,7 @@ void NeuralNet::Train(const std::vector<std::vector<double>>& batchInputs, const
 
 }
 
-void NeuralNet::Eval(const std::vector< std::vector<double> >& input, const std::vector<int>& trueValues)
+double NeuralNet::Eval(const std::vector< std::vector<double> >& input, const std::vector<int>& trueValues)
 {
 	auto& startLayer = m_Layers[0];
 	auto& lastLayer = m_Layers.back();
@@ -64,8 +64,12 @@ void NeuralNet::Eval(const std::vector< std::vector<double> >& input, const std:
 		int pred = std::distance(output[0].begin(), std::max_element(output[0].begin(), output[0].end()));
 		if (pred == trueValues[i]) ++hit;
 	}
+
+	double acc = 0.0;
 	std::cout << "Sample weight: " << lastLayer.GetWeights()[0][0] << "\n";
+	acc = (static_cast<double>(hit) / trueValues.size()) * 100;
 	std::cout << "Accuracy: " << ((static_cast<double>(hit) / trueValues.size()) * 100) << "%\n";
+	return acc;
 }
 
 void NeuralNet::AdjustLr(double lr)
