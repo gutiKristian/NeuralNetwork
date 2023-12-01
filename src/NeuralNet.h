@@ -22,5 +22,5 @@ private:
 
 	std::random_device m_Rd;
 	std::mt19937 m_Generator;
-	std::bernoulli_distribution m_Bernoulli; // 0.5 by default
+	std::bernoulli_distribution m_Bernoulli{0.8}; // 0.5 by default
 };
