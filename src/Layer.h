@@ -237,6 +237,10 @@ public:
 				}
 				weigthDer /= batchSize;
 				double deltaWeight = -m_LearningRate * weigthDer + m_Momentum[i][j] * m_MomentumAlpha;
+				if (USE_DECAY)
+				{
+					m_Weights[i][j] *= (1 - ZETA);
+				}
 				m_Weights[i][j] += deltaWeight;
 				m_Momentum[i][j] = deltaWeight;
 			}
