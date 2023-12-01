@@ -12,12 +12,12 @@
 
 
 #define EPOCH_SIZE 100
-#define BATCH_SIZE 50
+#define BATCH_SIZE 100
 #define TRAINING_SIZE 60'000 // 59'968 //59'904
 #define VALIDATION_SIZE 12000 //5888
 #define NORMALIZE_DATA 0
-#define STOPPING_ACC 88.0
-#define RESHUFFLE_ALL 0
+#define STOPPING_ACC 90.85
+#define RESHUFFLE_ALL 1
 
 /*
 * Normalizes data and then scales them into [0, 1] interval.
@@ -193,7 +193,7 @@ int main()
 	//						PREPARE INDICES
 
 	std::random_device rd;
-	std::mt19937 generator(rd());
+	std::mt19937 generator(1337);
 
 	// Fill with [0,1,2,...,trainData.size()]
 	std::vector<int> indices(trainData.size());
@@ -214,18 +214,14 @@ int main()
 
 	NeuralNet net({
 	Layer(784, 64, ReLu, ReLuPrime),
-	Layer(64, 10, Softmax, DoNothing)
+	Layer(64, 32, ReLu, ReLuPrime),
+	Layer(32, 10, Softmax, DoNothing)
 		}, BATCH_SIZE);
 
 	std::cout << "\n\n";
 	for (int epoch = 0; epoch < EPOCH_SIZE; ++epoch)
 	{
 		std::cout << "\t\tEpoch " << epoch+1 << "\n";
-
-		/*	if (epoch > 9)
-			{
-				net.AdjustLr(0.001);
-			}*/
 
 		// Training
 
@@ -257,6 +253,10 @@ int main()
 		}
 
 		double acc = net.Eval(validationData, validationLabels);
+		/*	if (acc > 89.0)
+			{
+				net.AdjustLr(0.001);
+			}*/
 
 		if (acc > STOPPING_ACC)
 		{
