@@ -211,7 +211,8 @@ int main()
 	//						NET TRAINING
 
 	NeuralNet net({
-	Layer(784, 64, ReLu, ReLuPrime),
+	Layer(784, 128, ReLu, ReLuPrime),
+	Layer(128, 64, ReLu, ReLuPrime),
 	Layer(64, 10, Softmax, DoNothing)
 		}, BATCH_SIZE);
 
@@ -220,9 +221,9 @@ int main()
 	{
 		std::cout << "\t\tEpoch " << epoch+1 << "\n";
 
-		if (epoch > 20)
+		if (epoch > 9)
 		{
-			net.AdjustLr(0.0001);
+			net.AdjustLr(0.001);
 		}
 
 		// Training
@@ -256,7 +257,7 @@ int main()
 
 		double acc = net.Eval(validationData, validationLabels);
 
-		if (acc > 91.00)
+		if (acc > 90.2)
 		{
 			std::cout << "\nEnding..\n";
 			break;

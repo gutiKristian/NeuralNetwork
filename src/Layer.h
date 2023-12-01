@@ -7,6 +7,9 @@
 #include <random>
 #include <algorithm>
 
+#define USE_DECAY 0
+#define ZETA 1e-5
+
 class Layer
 {
 	using Matrix = std::vector<std::vector<double>>;
@@ -128,6 +131,10 @@ public:
 
 				weigthDer /= batchSize;
 				double deltaWeight = -m_LearningRate * weigthDer + m_Momentum[i][j] * m_MomentumAlpha;
+				if (USE_DECAY)
+				{
+					m_Weights[i][j] *= (1 - ZETA);
+				}
 				m_Weights[i][j] += deltaWeight;
 				m_Momentum[i][j] = deltaWeight;
 			}
@@ -230,6 +237,10 @@ public:
 				}
 				weigthDer /= batchSize;
 				double deltaWeight = -m_LearningRate * weigthDer + m_Momentum[i][j] * m_MomentumAlpha;
+				if (USE_DECAY)
+				{
+					m_Weights[i][j] *= (1 - ZETA);
+				}
 				m_Weights[i][j] += deltaWeight;
 				m_Momentum[i][j] = deltaWeight;
 			}
