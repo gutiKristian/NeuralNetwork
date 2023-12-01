@@ -296,7 +296,7 @@ private:
 	void InitWeights()
 	{
 		std::random_device rd;
-		std::mt19937 gen(42);
+		std::mt19937 gen(3);
 
 		// Initialization 1
 
