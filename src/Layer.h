@@ -57,7 +57,7 @@ public:
 		assert(batch.size() > 0 && "Batch size must be > 0");
 		assert(m_InputSize == batch[0].size()); // assume its uniform 2D array
 
-		bool useDropout = (p_NextLayer != nullptr) && dropMask.size() > 0;
+		bool useDropout = (p_NextLayer != nullptr) && (dropMask.size() > 0);
 
 		auto batchSize = batch.size();
 		
@@ -203,7 +203,7 @@ public:
 		// Next layer in backpropagation is layer that is previous to this one
 		auto nextLayerSize = p_PrevLayer->GetLayerSize();
 
-		bool useDropout = dropMask.size() > 1;
+		bool useDropout = dropMask.size() > 0;
 
 		for (int k = 0; k < batchSize; ++k)
 		{

@@ -36,7 +36,7 @@ NeuralNet::NeuralNet(std::initializer_list<Layer> layers, int batchSize) : m_Lay
 		}
 	}
 
-	m_Generator = std::mt19937(m_Rd);
+	m_Generator = std::mt19937(m_Rd());
 }
 
 void NeuralNet::Train(const std::vector<std::vector<double>>& batchInputs, const std::vector<std::vector<int>>& batchOutputs)
@@ -56,7 +56,6 @@ void NeuralNet::Train(const std::vector<std::vector<double>>& batchInputs, const
 			dropoutMask[l].push_back(static_cast<int>(m_Bernoulli(m_Generator)));
 		}
 	}
-
 
 	auto& startLayer = m_Layers[0];
 	auto& outputLayer = m_Layers.back();
