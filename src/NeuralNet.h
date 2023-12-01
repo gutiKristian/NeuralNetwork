@@ -1,6 +1,7 @@
 #pragma once
 #include "Layer.h"
 #include <vector>
+#include <random>
 
 class NeuralNet
 {
@@ -18,4 +19,8 @@ private:
 	std::vector<Layer> m_Layers;
 	Layer m_InputLayer; // Dummy input layer for backprop
 	int m_BatchSize;
+
+	std::random_device m_Rd;
+	std::mt19937 m_Generator;
+	std::bernoulli_distribution m_Bernoulli; // 0.5 by default
 };

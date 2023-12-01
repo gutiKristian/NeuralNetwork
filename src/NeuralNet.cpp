@@ -8,8 +8,10 @@ NeuralNet::NeuralNet(std::initializer_list<Layer> layers, int batchSize) : m_Lay
 	size_t _max = 0;
 	// Pre-allocate memory
 	{
+		int index = 0;
 		for (auto& l : m_Layers)
 		{
+			l.SetLayerIndex(index++);
 			l.PreAllocateMem(m_BatchSize);
 			
 			// prob gonna delete this
@@ -34,20 +36,36 @@ NeuralNet::NeuralNet(std::initializer_list<Layer> layers, int batchSize) : m_Lay
 		}
 	}
 
+	m_Generator = std::mt19937(m_Rd);
 }
 
 void NeuralNet::Train(const std::vector<std::vector<double>>& batchInputs, const std::vector<std::vector<int>>& batchOutputs)
 {
 	assert(m_Layers.size() > 0 && "No layers present!");
 
+	// Generate dropout mask
+	std::vector< std::vector<int> > dropoutMask{};
+
+	// Skip output layer
+	for (int l = 0; l < m_Layers.size() - 1; ++l)
+	{
+		dropoutMask.push_back({});
+		auto size =  m_Layers[l].GetLayerSize();
+		for (int i = 0; i < size; ++i)
+		{
+			dropoutMask[l].push_back(static_cast<int>(m_Bernoulli(m_Generator)));
+		}
+	}
+
+
 	auto& startLayer = m_Layers[0];
 	auto& outputLayer = m_Layers.back();
 	auto& inputLayerOut = m_InputLayer.SetOutput();
 	inputLayerOut = batchInputs;
 
-	startLayer.Forward(batchInputs);
+	startLayer.Forward(batchInputs, dropoutMask);
 
-	outputLayer.Backward(batchOutputs);
+	outputLayer.Backward(batchOutputs, dropoutMask);
 
 }
 

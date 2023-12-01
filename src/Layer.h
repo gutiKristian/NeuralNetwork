@@ -52,10 +52,12 @@ public:
 	/*
 	* Input is 2D array of inputs -- batch
 	*/
-	void Forward(const Matrix& batch)
+	void Forward(const Matrix& batch, const std::vector< std::vector<int> >& dropMask = {})
 	{
 		assert(batch.size() > 0 && "Batch size must be > 0");
 		assert(m_InputSize == batch[0].size()); // assume its uniform 2D array
+
+		bool useDropout = (p_NextLayer != nullptr) && dropMask.size() > 0;
 
 		auto batchSize = batch.size();
 		
@@ -65,6 +67,11 @@ public:
 			// Traverse neuron by neuron
 			for (int i = 0; i < m_LayerSize; ++i)
 			{
+				if (useDropout && dropMask[m_LayerIndex][i] == 0)
+				{
+					continue;
+				}
+
 				double current = 0.0;
 				for (int j = 0; j < m_InputSize; ++j)
 				{
@@ -84,7 +91,7 @@ public:
 
 		if (p_NextLayer != nullptr)
 		{
-			p_NextLayer->Forward(m_Outputs);
+			p_NextLayer->Forward(m_Outputs, dropMask);
 		}
 	}
 
@@ -93,7 +100,7 @@ public:
 	* @batchPredResult: prediction made by network
 	* @batchOutputs: Ground truth
 	*/
-	void Backward(const std::vector< std::vector<int> >& trueValuesBatch)
+	void Backward(const std::vector< std::vector<int> >& trueValuesBatch, const std::vector< std::vector<int> >& dropMask = {})
 	{
 		assert(trueValuesBatch.size() == m_Outputs.size() && m_Outputs.size() > 0 && "Size mismatch!");
 
@@ -128,7 +135,10 @@ public:
 				{
 					weigthDer += gradients[k][i] * y_i[k][j];
 				}
-
+				if (weigthDer == 0)
+				{
+					continue; // do not update as neuron below was deactivated
+				}
 				weigthDer /= batchSize;
 				double deltaWeight = -m_LearningRate * weigthDer + m_Momentum[i][j] * m_MomentumAlpha;
 				if (USE_DECAY)
@@ -172,13 +182,13 @@ public:
 			}
 		}
 
-		p_PrevLayer->Backward(inputNextLayer);
+		p_PrevLayer->Backward(inputNextLayer, dropMask);
 	}
 
 	/*
 	* @derivedValues: derivation computed in the layer above
 	*/
-	void Backward(const Matrix& inputDerivation)
+	void Backward(const Matrix& inputDerivation, const std::vector< std::vector<int> >& dropMask = {})
 	{
 
 		if (p_PrevLayer == nullptr)
@@ -193,6 +203,7 @@ public:
 		// Next layer in backpropagation is layer that is previous to this one
 		auto nextLayerSize = p_PrevLayer->GetLayerSize();
 
+		bool useDropout = dropMask.size() > 1;
 
 		for (int k = 0; k < batchSize; ++k)
 		{
@@ -241,8 +252,16 @@ public:
 				{
 					m_Weights[i][j] *= (1 - ZETA);
 				}
-				m_Weights[i][j] += deltaWeight;
-				m_Momentum[i][j] = deltaWeight;
+				if (useDropout && dropMask[m_LayerIndex][i] == 0)
+				{
+					// dont update weight
+				}
+				else
+				{
+					m_Weights[i][j] += deltaWeight;
+					m_Momentum[i][j] = deltaWeight;
+				}
+			
 			}
 		}
 
@@ -254,10 +273,17 @@ public:
 				biasDer += inputDerivation[k][i] * m_PrimeOutputs[k][i];
 			}
 			biasDer /= batchSize;
-			m_Bias[i] += -m_LearningRate * biasDer;
+			if (useDropout && dropMask[m_LayerIndex][i] == 0)
+			{
+				// dont update bias
+			}
+			else
+			{
+				m_Bias[i] += -m_LearningRate * biasDer;
+			}
 		}
 
-		p_PrevLayer->Backward(inputNextLayer);
+		p_PrevLayer->Backward(inputNextLayer, dropMask);
 	}
 
 	void SetForwardConnection(Layer* nextLayer)
@@ -290,6 +316,8 @@ public:
 	const Matrix& GetWeights() { return m_Weights; }
 
 	void SetLearningRate(double lr) { m_LearningRate = lr; }
+	
+	void SetLayerIndex(int id) { m_LayerIndex = id; }
 
 private:
 	
@@ -343,4 +371,5 @@ private:
 	//
 	Layer* p_NextLayer = nullptr;
 	Layer* p_PrevLayer = nullptr;
+	int m_LayerIndex = 0;
 };
