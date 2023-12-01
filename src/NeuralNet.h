@@ -11,6 +11,8 @@ public:
 
 	double Eval(const std::vector< std::vector<double> >& input, const std::vector<int>& trueValues);
 
+	std::vector<int> EvalTest(const std::vector< std::vector<double> >& input, const std::vector<int>& trueValues);
+
 	void AdjustLr(double lr);
 
 private:

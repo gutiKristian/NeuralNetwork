@@ -13,7 +13,7 @@
 
 #define EPOCH_SIZE 100
 #define BATCH_SIZE 100
-#define TRAINING_SIZE 60'000 // 59'968 //59'904
+#define TRAINING_SIZE 60'000// 59'968 //59'904
 #define VALIDATION_SIZE 12000 //5888
 #define NORMALIZE_DATA 0
 #define STOPPING_ACC 90.85
@@ -155,6 +155,32 @@ void PrepareIndices(const std::vector<int>& shuffledIndices, std::vector<int>& t
 
 }
 
+void WriteResults(std::string&& name, const std::vector<int>& data)
+{
+	std::string path = "../../../" + name;
+
+	std::ofstream outputFile(path, std::ios::out | std::ios::trunc);
+
+	if (!outputFile.is_open())
+	{
+		std::cout << "Error opening the file: " << path << std::endl;
+		return;
+	}
+
+	for (size_t i = 0; i < data.size(); ++i)
+	{
+		outputFile << data[i];
+		if (i < data.size() - 1)
+		{
+			outputFile << std::endl;
+		}
+	}
+
+	outputFile.close();
+
+	std::cout << "CSV file has been created: " << path << std::endl;
+}
+
 int main()
 {
 
@@ -172,19 +198,12 @@ int main()
 	LoadMnistData(trainData, "fashion_mnist_train_vectors.csv");
 	LoadMnistDataLabels(trainLabels, "fashion_mnist_train_labels.csv"); 
 
-	std::vector< std::vector<double> > testData;
-	std::vector<int> testLabels;
-
-	LoadMnistData(testData, "fashion_mnist_test_vectors.csv");
-	LoadMnistDataLabels(testLabels, "fashion_mnist_test_labels.csv");
-
 	assert(trainData.size() == TRAINING_SIZE);
 	assert(trainLabels.size() == TRAINING_SIZE);
 
 	if (NORMALIZE_DATA)
 	{
 		NormalizeData(trainData);
-		NormalizeData(testData);
 	}
 
 	std::cout << "Data loaded after: " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - timeStart) << " seconds\n";
@@ -193,7 +212,7 @@ int main()
 	//						PREPARE INDICES
 
 	std::random_device rd;
-	std::mt19937 generator(1337);
+	std::mt19937 generator(42);
 
 	// Fill with [0,1,2,...,trainData.size()]
 	std::vector<int> indices(trainData.size());
@@ -277,8 +296,6 @@ int main()
 			std::shuffle(sgdTrain.begin(), sgdTrain.end(), generator);
 		}
 
-		
-
 		std::cout << "Epoch " << epoch + 1 << " done, time elapsed:\n";
 		auto timeEpochDone = std::chrono::high_resolution_clock::now();
 		auto timeDurationSeconds = std::chrono::duration_cast<std::chrono::seconds>(timeEpochDone - timeStart);
@@ -287,9 +304,27 @@ int main()
 		std::cout << "\n";
 	}
 
+	// Loading test data here to assure we haven't touched them
+	std::vector< std::vector<double> > testData;
+	std::vector<int> testLabels;
+
+	LoadMnistData(testData, "fashion_mnist_test_vectors.csv");
+	LoadMnistDataLabels(testLabels, "fashion_mnist_test_labels.csv");
+
+	if (NORMALIZE_DATA)
+	{
+		NormalizeData(testData);
+	}
+
 	// Test data
 	std::cout << "Evaluating test data...\n";
 	net.Eval(testData, testLabels);
+
+	std::vector<int> testPredictions = net.EvalTest(testData, testLabels);
+	std::vector<int> trainPredictions = net.EvalTest(trainData, trainLabels);
+
+	WriteResults("test_predictions.csv", testPredictions);
+	WriteResults("train_predictions.csv", trainPredictions);
 
 	std::cout << "Done!\n";
 	return 0;

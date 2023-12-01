@@ -72,6 +72,25 @@ double NeuralNet::Eval(const std::vector< std::vector<double> >& input, const st
 	return acc;
 }
 
+std::vector<int> NeuralNet::EvalTest(const std::vector<std::vector<double>>& input, const std::vector<int>& trueValues)
+{
+	auto& startLayer = m_Layers[0];
+	auto& lastLayer = m_Layers.back();
+
+	std::vector<int> predictions;
+	predictions.reserve(input.size());
+
+	for (int i = 0; i < input.size(); ++i)
+	{
+		startLayer.Forward({ input[i] });
+		auto& output = lastLayer.GetOutputs();
+		int pred = std::distance(output[0].begin(), std::max_element(output[0].begin(), output[0].end()));
+		predictions.push_back(pred);
+	}
+
+	return predictions;
+}
+
 void NeuralNet::AdjustLr(double lr)
 {
 	m_InputLayer.SetLearningRate(lr);
