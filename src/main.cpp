@@ -12,10 +12,12 @@
 
 
 #define EPOCH_SIZE 100
-#define BATCH_SIZE 100
+#define BATCH_SIZE 50
 #define TRAINING_SIZE 60'000 // 59'968 //59'904
 #define VALIDATION_SIZE 12000 //5888
 #define NORMALIZE_DATA 0
+#define STOPPING_ACC 88.0
+#define RESHUFFLE_ALL 0
 
 /*
 * Normalizes data and then scales them into [0, 1] interval.
@@ -211,8 +213,7 @@ int main()
 	//						NET TRAINING
 
 	NeuralNet net({
-	Layer(784, 128, ReLu, ReLuPrime),
-	Layer(128, 64, ReLu, ReLuPrime),
+	Layer(784, 64, ReLu, ReLuPrime),
 	Layer(64, 10, Softmax, DoNothing)
 		}, BATCH_SIZE);
 
@@ -221,10 +222,10 @@ int main()
 	{
 		std::cout << "\t\tEpoch " << epoch+1 << "\n";
 
-		if (epoch > 9)
-		{
-			net.AdjustLr(0.001);
-		}
+		/*	if (epoch > 9)
+			{
+				net.AdjustLr(0.001);
+			}*/
 
 		// Training
 
@@ -257,15 +258,26 @@ int main()
 
 		double acc = net.Eval(validationData, validationLabels);
 
-		if (acc > 90.2)
+		if (acc > STOPPING_ACC)
 		{
 			std::cout << "\nEnding..\n";
 			break;
 		}
 
 		// Reshuffle
-		std::shuffle(indices.begin(), indices.end(), generator);
-		PrepareIndices(indices, sgdTrain, sgdValidate);
+		if (RESHUFFLE_ALL)
+		{
+			// We shuffle whole train data and also change the validation set
+			std::shuffle(indices.begin(), indices.end(), generator);
+			PrepareIndices(indices, sgdTrain, sgdValidate);
+		}
+		else
+		{
+			// Just change batches, validation stays the same for entire training
+			std::shuffle(sgdTrain.begin(), sgdTrain.end(), generator);
+		}
+
+		
 
 		std::cout << "Epoch " << epoch + 1 << " done, time elapsed:\n";
 		auto timeEpochDone = std::chrono::high_resolution_clock::now();
