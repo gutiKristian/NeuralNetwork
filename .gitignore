@@ -33,7 +33,8 @@
 
 # Data
 data/
-
+test_predictions.csv
+train_predictions.csv
 # Compiled
 out/
 
