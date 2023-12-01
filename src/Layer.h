@@ -7,8 +7,8 @@
 #include <random>
 #include <algorithm>
 
-#define USE_DECAY 1
-#define ZETA 1e-4
+#define USE_DECAY 0
+#define ZETA 1e-5
 
 class Layer
 {
