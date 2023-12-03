@@ -18,6 +18,7 @@
 #define NORMALIZE_DATA 0
 #define STOPPING_ACC 90.85
 #define RESHUFFLE_ALL 1
+#define SHUFFLE_SEED 42
 
 /*
 * Normalizes data and then scales them into [0, 1] interval.
@@ -67,7 +68,7 @@ void NormalizeData(std::vector< std::vector<double> >& data)
 
 void LoadMnistData(std::vector< std::vector<double>>& data, std::string name)
 {
-	std::string path = "../../../data/" + name;
+	std::string path = "data/" + name;
 	std::cout << "Loading: " << path << "...";
 	std::ifstream file(path);
 
@@ -106,7 +107,7 @@ void LoadMnistData(std::vector< std::vector<double>>& data, std::string name)
 
 void LoadMnistDataLabels(std::vector<int>& labels, std::string name)
 {
-	std::string path = "../../../data/" + name;
+	std::string path = "data/" + name;
 	std::cout << "Loading: " << path << "...";
 	std::ifstream file(path);
 
@@ -206,13 +207,15 @@ int main()
 		NormalizeData(trainData);
 	}
 
-	std::cout << "Data loaded after: " << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - timeStart) << " seconds\n";
+	auto timeDataLoad = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - timeStart).count();
+
+	std::cout << "Data loaded after: " << timeDataLoad << " seconds\n";
 	//////////////////////////////////////////////////////////////////////////
 	// 
 	//						PREPARE INDICES
 
 	std::random_device rd;
-	std::mt19937 generator(42);
+	std::mt19937 generator(SHUFFLE_SEED);
 
 	// Fill with [0,1,2,...,trainData.size()]
 	std::vector<int> indices(trainData.size());
@@ -272,10 +275,6 @@ int main()
 		}
 
 		double acc = net.Eval(validationData, validationLabels);
-		/*	if (acc > 89.0)
-			{
-				net.AdjustLr(0.001);
-			}*/
 
 		if (acc > STOPPING_ACC)
 		{

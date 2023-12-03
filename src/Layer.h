@@ -9,6 +9,7 @@
 
 #define USE_DECAY 0
 #define ZETA 1e-5
+#define WEIGHT_SEED 3
 
 class Layer
 {
@@ -296,7 +297,7 @@ private:
 	void InitWeights()
 	{
 		std::random_device rd;
-		std::mt19937 gen(3);
+		std::mt19937 gen(WEIGHT_SEED);
 
 		// Initialization 1
 
