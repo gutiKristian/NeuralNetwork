@@ -158,7 +158,7 @@ void PrepareIndices(const std::vector<int>& shuffledIndices, std::vector<int>& t
 
 void WriteResults(std::string&& name, const std::vector<int>& data)
 {
-	std::string path = "../../../" + name;
+	std::string path = name;
 
 	std::ofstream outputFile(path, std::ios::out | std::ios::trunc);
 
