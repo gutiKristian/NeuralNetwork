@@ -68,7 +68,7 @@ void NormalizeData(std::vector< std::vector<double> >& data)
 
 void LoadMnistData(std::vector< std::vector<double>>& data, std::string name)
 {
-	std::string path = "data/" + name;
+	std::string path = "../../../data/" + name;
 	std::cout << "Loading: " << path << "...";
 	std::ifstream file(path);
 
@@ -107,7 +107,7 @@ void LoadMnistData(std::vector< std::vector<double>>& data, std::string name)
 
 void LoadMnistDataLabels(std::vector<int>& labels, std::string name)
 {
-	std::string path = "data/" + name;
+	std::string path = "../../../data/" + name;
 	std::cout << "Loading: " << path << "...";
 	std::ifstream file(path);
 
